@@ -19,7 +19,20 @@ object Prefs {
         prefs(ctx).edit().putString("user", user).putString("pass", pass).putBoolean("setup_done", true).apply()
 
     fun clearAccount(ctx: Context) =
-        prefs(ctx).edit().remove("user").remove("pass").putBoolean("setup_done", false).apply()
+        prefs(ctx).edit()
+            .remove("user").remove("pass")
+            .putBoolean("setup_done", false)
+            .putBoolean("welcome_done", false)
+            .apply()
+
+    fun isWelcomeDone(ctx: Context) = prefs(ctx).getBoolean("welcome_done", false)
+    fun setWelcomeDone(ctx: Context, v: Boolean) = prefs(ctx).edit().putBoolean("welcome_done", v).apply()
+
+    fun isDarkTheme(ctx: Context) = prefs(ctx).getBoolean("dark_theme", true)
+    fun setDarkTheme(ctx: Context, v: Boolean) = prefs(ctx).edit().putBoolean("dark_theme", v).apply()
+
+    fun getFontScale(ctx: Context) = prefs(ctx).getFloat("font_scale", 1.0f)
+    fun setFontScale(ctx: Context, v: Float) = prefs(ctx).edit().putFloat("font_scale", v).apply()
 
     fun getDesktopPins(ctx: Context): Set<String> =
         prefs(ctx).getStringSet("desktop_pins", emptySet()) ?: emptySet()
@@ -34,6 +47,47 @@ object Prefs {
         val set = getDesktopPins(ctx).toMutableSet()
         set.remove(path)
         prefs(ctx).edit().putStringSet("desktop_pins", set).apply()
+    }
+
+    /** Hidden from desktop only (recycle bin) — not deleted from phone */
+    fun getRecycle(ctx: Context): Set<String> =
+        prefs(ctx).getStringSet("recycle_bin", emptySet()) ?: emptySet()
+
+    fun moveToRecycle(ctx: Context, key: String) {
+        val rec = getRecycle(ctx).toMutableSet()
+        rec.add(key)
+        val pins = getDesktopPins(ctx).toMutableSet()
+        if (key.startsWith("file:")) pins.remove(key.removePrefix("file:"))
+        prefs(ctx).edit()
+            .putStringSet("recycle_bin", rec)
+            .putStringSet("desktop_pins", pins)
+            .apply()
+    }
+
+    fun restoreFromRecycle(ctx: Context, key: String) {
+        val rec = getRecycle(ctx).toMutableSet()
+        rec.remove(key)
+        if (key.startsWith("file:")) {
+            val pins = getDesktopPins(ctx).toMutableSet()
+            pins.add(key.removePrefix("file:"))
+            prefs(ctx).edit().putStringSet("recycle_bin", rec).putStringSet("desktop_pins", pins).apply()
+        } else {
+            prefs(ctx).edit().putStringSet("recycle_bin", rec).apply()
+        }
+    }
+
+    fun emptyRecycle(ctx: Context) =
+        prefs(ctx).edit().putStringSet("recycle_bin", emptySet()).apply()
+
+    fun getHiddenApps(ctx: Context): Set<String> =
+        prefs(ctx).getStringSet("hidden_apps", emptySet()) ?: emptySet()
+
+    fun hideApp(ctx: Context, packageActivity: String) {
+        val s = getHiddenApps(ctx).toMutableSet()
+        s.add(packageActivity)
+        val rec = getRecycle(ctx).toMutableSet()
+        rec.add("app:$packageActivity")
+        prefs(ctx).edit().putStringSet("hidden_apps", s).putStringSet("recycle_bin", rec).apply()
     }
 
     fun getIconPositions(ctx: Context) = prefs(ctx).getString("positions", "{}") ?: "{}"

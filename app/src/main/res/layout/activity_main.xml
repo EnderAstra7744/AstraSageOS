@@ -22,7 +22,7 @@
         android:id="@+id/desktop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="64dp"
+        android:layout_marginBottom="56dp"
         android:clipChildren="false"
         android:clipToPadding="false" />
 
@@ -30,86 +30,52 @@
         android:id="@+id/selectionOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="64dp"
+        android:layout_marginBottom="56dp"
         android:visibility="invisible" />
 
-    <LinearLayout
-        android:id="@+id/topBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="8dp"
-        android:background="@drawable/bg_top_glass">
-
-        <TextView
-            android:id="@+id/titleText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="AstraSage OS"
-            android:textColor="@color/accent"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:shadowColor="#A0000000"
-            android:shadowDx="0"
-            android:shadowDy="2"
-            android:shadowRadius="6" />
-
-        <TextView
-            android:id="@+id/subtitleText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
-            android:text="Masaüstü"
-            android:textColor="@color/text_dim"
-            android:textSize="11sp" />
-
-        <EditText
-            android:id="@+id/searchBox"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_search"
-            android:hint="@string/search_hint"
-            android:textColorHint="@color/text_dim"
-            android:textColor="@color/text"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:inputType="text"
-            android:imeOptions="actionSearch"
-            android:maxLines="1"
-            android:textSize="13sp" />
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/appGrid"
+    <!-- Floating windows host -->
+    <FrameLayout
+        android:id="@+id/windowsHost"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="110dp"
-        android:layout_marginBottom="64dp"
-        android:padding="10dp"
-        android:clipToPadding="false"
-        android:visibility="gone"
-        android:background="#CC050507" />
+        android:layout_marginBottom="56dp"
+        android:clipChildren="false" />
 
+    <!-- Welcome overlay -->
+    <FrameLayout
+        android:id="@+id/welcomeOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC050507"
+        android:visibility="gone"
+        android:elevation="40dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="16dp"
+            android:orientation="vertical"
+            android:background="@drawable/bg_panel_window">
+            <include layout="@layout/panel_welcome" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Taskbar -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
         android:layout_gravity="bottom"
         android:orientation="horizontal"
-        android:gravity="center"
+        android:gravity="center_vertical"
         android:background="@drawable/bg_taskbar"
         android:paddingStart="4dp"
-        android:paddingEnd="4dp"
-        android:elevation="16dp">
+        android:paddingEnd="6dp"
+        android:elevation="20dp">
 
         <LinearLayout
             android:id="@+id/btnStart"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
             android:gravity="center"
             android:background="@drawable/bg_start_btn">
             <TextView
@@ -118,102 +84,48 @@
                 android:text="AS"
                 android:textColor="@color/accent"
                 android:textStyle="bold"
-                android:textSize="13sp" />
+                android:textSize="12sp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/btnAst"
+        <HorizontalScrollView
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:background="?attr/selectableItemBackgroundBorderless">
-            <ImageView
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ast_icon"
-                android:scaleType="centerCrop"
-                android:contentDescription="AST" />
-            <TextView
+            android:scrollbars="none">
+            <LinearLayout
+                android:id="@+id/taskbarApps"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AST"
-                android:textColor="@color/text_dim"
-                android:textSize="9sp" />
-        </LinearLayout>
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="4dp" />
+        </HorizontalScrollView>
 
-        <LinearLayout
-            android:id="@+id/btnFiles"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+        <TextView
+            android:id="@+id/clockView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical"
-            android:background="?attr/selectableItemBackgroundBorderless">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📁"
-                android:textSize="16sp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Dosyalar"
-                android:textColor="@color/text_dim"
-                android:textSize="9sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/btnAll"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:background="?attr/selectableItemBackgroundBorderless">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="▦"
-                android:textColor="@color/text"
-                android:textSize="16sp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tümü"
-                android:textColor="@color/text_dim"
-                android:textSize="9sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/btnDesktop"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:background="?attr/selectableItemBackgroundBorderless">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Masaüstü"
-                android:textColor="@color/accent"
-                android:textSize="10sp" />
-        </LinearLayout>
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
+            android:textColor="@color/text"
+            android:textSize="11sp"
+            android:lineSpacingExtra="1dp"
+            android:text="12:00\n1 Oca" />
     </LinearLayout>
 
+    <!-- Start menu -->
     <LinearLayout
         android:id="@+id/startMenu"
-        android:layout_width="280dp"
+        android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_marginStart="8dp"
-        android:layout_marginBottom="72dp"
+        android:layout_marginBottom="64dp"
         android:orientation="vertical"
         android:background="@drawable/bg_start_menu"
         android:padding="12dp"
-        android:elevation="20dp"
+        android:elevation="24dp"
         android:visibility="gone">
 
         <TextView
@@ -225,66 +137,24 @@
             android:textSize="14sp"
             android:paddingBottom="8dp" />
 
-        <TextView
-            android:id="@+id/menuAst"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:paddingStart="8dp"
-            android:text="  AST Terminal"
-            android:textColor="@color/text"
-            android:textSize="14sp"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/menuFiles"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:paddingStart="8dp"
-            android:text="  Dosya Gezgini"
-            android:textColor="@color/text"
-            android:textSize="14sp"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/menuAll"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:paddingStart="8dp"
-            android:text="  Tüm uygulamalar"
-            android:textColor="@color/text"
-            android:textSize="14sp"
-            android:background="?attr/selectableItemBackground" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
-            android:background="#22FFFFFF" />
-
-        <TextView
-            android:id="@+id/menuAbout"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:paddingStart="8dp"
-            android:text="  Bu cihaz hakkında"
-            android:textColor="@color/text"
-            android:textSize="14sp"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/menuLogout"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:gravity="center_vertical"
-            android:paddingStart="8dp"
-            android:text="  Oturumu kapat"
-            android:textColor="@color/danger"
-            android:textSize="14sp"
-            android:background="?attr/selectableItemBackground" />
+        <TextView android:id="@+id/menuAst" android:layout_width="match_parent" android:layout_height="42dp"
+            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  AST Terminal"
+            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
+        <TextView android:id="@+id/menuFiles" android:layout_width="match_parent" android:layout_height="42dp"
+            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Dosya Gezgini"
+            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
+        <TextView android:id="@+id/menuThisPc" android:layout_width="match_parent" android:layout_height="42dp"
+            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Bu Bilgisayar"
+            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
+        <TextView android:id="@+id/menuTrash" android:layout_width="match_parent" android:layout_height="42dp"
+            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Çöp Kutusu"
+            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
+        <TextView android:id="@+id/menuCalendar" android:layout_width="match_parent" android:layout_height="42dp"
+            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Takvim / Saat"
+            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="6dp" android:background="#22FFFFFF" />
+        <TextView android:id="@+id/menuLogout" android:layout_width="match_parent" android:layout_height="42dp"
+            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Oturumu kapat"
+            android:textColor="@color/danger" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
     </LinearLayout>
 </FrameLayout>

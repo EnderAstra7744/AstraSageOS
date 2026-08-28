@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Çöp Kutusu"
+        android:textColor="@color/text"
+        android:textStyle="bold"
+        android:textSize="15sp"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Öğeler yalnızca AstraSage masaüstünden kaldırılır; telefonda silinmez."
+        android:textColor="@color/text_dim"
+        android:textSize="11sp"
+        android:layout_marginBottom="10dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/trashList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/btnEmptyTrash"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:gravity="center"
+        android:background="@drawable/bg_choice"
+        android:text="Çöpü boşalt (masaüstü kayıtları)"
+        android:textColor="@color/danger"
+        android:textSize="13sp"
+        android:layout_marginTop="8dp" />
+</LinearLayout>
