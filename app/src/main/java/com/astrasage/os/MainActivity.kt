@@ -1163,25 +1163,31 @@ class MainActivity : AppCompatActivity() {
             return
         }
         val overlay = LayoutInflater.from(this).inflate(R.layout.panel_app_drawer, windowsHost, false)
-        val lp = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
+        windowsHost.addView(
+            overlay,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
         )
-        windowsHost.addView(overlay, lp)
         drawerOverlay = overlay
         overlay.elevation = 50f
-
         overlay.findViewById<View>(R.id.btnCloseDrawer).setOnClickListener { closeAppDrawer() }
 
         val grid = overlay.findViewById<RecyclerView>(R.id.drawerGrid)
-        val span = if (resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) 8 else 5
+        val span = if (resources.configuration.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE) 8 else 5
         grid.layoutManager = androidx.recyclerview.widget.GridLayoutManager(this, span)
+        // Smooth scroll / no nested touch fights
+        grid.itemAnimator = null
+        grid.setHasFixedSize(true)
 
         val apps = allApps
         grid.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             override fun getItemCount() = apps.size
             override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                val v = LayoutInflater.from(parent.context).inflate(R.layout.item_drawer_app, parent, false)
+                val v = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_drawer_app, parent, false)
                 return object : RecyclerView.ViewHolder(v) {}
             }
             override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -1189,21 +1195,16 @@ class MainActivity : AppCompatActivity() {
                 val v = holder.itemView
                 v.findViewById<ImageView>(R.id.drawerIcon).setImageDrawable(app.icon)
                 v.findViewById<TextView>(R.id.drawerLabel).text = app.label
-                v.setOnClickListener { openApp(app) }
-                // Long press → pin to desktop
-                v.setOnLongClickListener {
-                    val pa = "${app.packageName}/${app.activityName}"
-                    Prefs.pinApp(this@MainActivity, pa)
-                    vibrate()
-                    Toast.makeText(this@MainActivity, "${app.label} masaüstüne eklendi", Toast.LENGTH_SHORT).show()
-                    layoutDesktop()
-                    true
+                v.setOnClickListener {
+                    if (!drawerDragging) openApp(app)
                 }
-                // Drag from drawer onto desktop: long-press then move to desktop edge
-                bindDrawerDrag(v, app)
+                // Long-press: pin OR start drag — no conflicting OnLongClickListener + OnTouch
+                bindDrawerDrag(v, app, grid)
             }
         }
     }
+
+    private var drawerDragging = false
 
     private fun closeAppDrawer() {
         drawerOverlay?.let { windowsHost.removeView(it) }
@@ -1211,76 +1212,102 @@ class MainActivity : AppCompatActivity() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun bindDrawerDrag(itemView: View, app: AppInfo) {
+    private fun bindDrawerDrag(itemView: View, app: AppInfo, grid: RecyclerView) {
         val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
-        val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
-        var downX = 0f; var downY = 0f
-        var dragging = false; var moved = false
-        var ghost: View? = null
-        var runnable: Runnable? = null
+        val longMs = ViewConfiguration.getLongPressTimeout().toLong()
+        var downRawX = 0f
+        var downRawY = 0f
+        var dragging = false
+        var ghost: ImageView? = null
+        var longRunnable: Runnable? = null
 
         itemView.setOnTouchListener { v, e ->
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    downX = e.rawX; downY = e.rawY
-                    dragging = false; moved = false
-                    runnable = Runnable {
+                    downRawX = e.rawX
+                    downRawY = e.rawY
+                    dragging = false
+                    drawerDragging = false
+                    longRunnable = Runnable {
+                        // Enter drag mode
                         dragging = true
+                        drawerDragging = true
+                        grid.requestDisallowInterceptTouchEvent(true)
                         vibrate()
-                        // floating ghost icon
-                        ghost = ImageView(this).apply {
+                        val loc = IntArray(2)
+                        windowsHost.getLocationOnScreen(loc)
+                        ghost = ImageView(this@MainActivity).apply {
                             setImageDrawable(app.icon)
-                            layoutParams = FrameLayout.LayoutParams(100, 100)
-                            x = e.rawX - 50
-                            y = e.rawY - 50
+                            alpha = 0.9f
                             elevation = 80f
-                            alpha = 0.85f
+                            layoutParams = FrameLayout.LayoutParams(96, 96)
+                            x = e.rawX - loc[0] - 48
+                            y = e.rawY - loc[1] - 48
                         }
                         windowsHost.addView(ghost)
                     }
-                    v.postDelayed(runnable!!, longPressTimeout)
-                    false // allow click/longclick too
+                    v.postDelayed(longRunnable!!, longMs)
+                    // false → RecyclerView can scroll; long-press still scheduled
+                    false
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    val dx = e.rawX - downX; val dy = e.rawY - downY
+                    val dx = e.rawX - downRawX
+                    val dy = e.rawY - downRawY
                     if (!dragging && (kotlin.math.abs(dx) > touchSlop || kotlin.math.abs(dy) > touchSlop)) {
-                        runnable?.let { v.removeCallbacks(it) }
+                        longRunnable?.let { v.removeCallbacks(it) }
+                        longRunnable = null
                     }
                     if (dragging) {
-                        moved = true
-                        ghost?.x = e.rawX - 50
-                        ghost?.y = e.rawY - 50
+                        val loc = IntArray(2)
+                        windowsHost.getLocationOnScreen(loc)
+                        ghost?.let { g ->
+                            g.x = e.rawX - loc[0] - 48
+                            g.y = e.rawY - loc[1] - 48
+                        }
+                        return@setOnTouchListener true
                     }
-                    dragging
+                    false
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    runnable?.let { v.removeCallbacks(it) }
-                    if (dragging && moved) {
-                        // Drop anywhere outside drawer top area counts as pin to desktop
+                    longRunnable?.let { v.removeCallbacks(it) }
+                    longRunnable = null
+                    grid.requestDisallowInterceptTouchEvent(false)
+                    if (dragging) {
                         val pa = "${app.packageName}/${app.activityName}"
-                        Prefs.pinApp(this, pa)
-                        // save position near drop
+                        Prefs.pinApp(this@MainActivity, pa)
                         val key = "app:$pa"
-                        val density = resources.displayMetrics.density
-                        val obj = loadPositions()
-                        obj.put(key, org.json.JSONObject().apply {
-                            put("x", (e.rawX - 40).toInt().coerceAtLeast(0))
-                            put("y", (e.rawY - 40).toInt().coerceAtLeast(0))
-                        })
-                        Prefs.setIconPositions(this, obj.toString())
-                        Toast.makeText(this, "${app.label} masaüstüne eklendi", Toast.LENGTH_SHORT).show()
+                        val loc = IntArray(2)
+                        desktop.getLocationOnScreen(loc)
+                        val localX = e.rawX - loc[0]
+                        val localY = e.rawY - loc[1]
+                        val gm = DesktopManager.grid()
+                        gm.snapToNearest(
+                            key, localX, localY,
+                            cellW.coerceAtLeast(1f), cellH.coerceAtLeast(1f),
+                            gridOriginX, gridOriginY
+                        )
+                        DesktopManager.saveLayout(this@MainActivity)
+                        ghost?.let { windowsHost.removeView(it) }
+                        ghost = null
+                        dragging = false
+                        drawerDragging = false
                         closeAppDrawer()
-                        layoutDesktop()
+                        // Defer layout to next frame — avoids freeze on UI thread burst
+                        desktop.post {
+                            layoutDesktop()
+                            Toast.makeText(this@MainActivity, "${app.label} eklendi", Toast.LENGTH_SHORT).show()
+                        }
+                        return@setOnTouchListener true
                     }
-                    ghost?.let { windowsHost.removeView(it) }
-                    ghost = null
-                    dragging = false
+                    drawerDragging = false
                     false
                 }
                 else -> false
             }
         }
     }
+
+
 
     private fun fillThisPc(root: View) {
         val user = Prefs.getUser(this)
@@ -1661,7 +1688,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun populateStartMenu() {
-        findViewById<View>(R.id.startMenuPanel)?.setOnClickListener { /* consume */ }
+        val panel = findViewById<View>(R.id.startMenuPanel)
+        panel?.setOnClickListener { /* consume */ }
+        // Drag start menu panel
+        panel?.let { enableStartMenuDrag(it) }
         findViewById<TextView>(R.id.startUserLabel)?.text = Prefs.getUser(this).ifBlank { "Kullanıcı" }
         val grid = findViewById<android.widget.GridLayout>(R.id.startPinnedGrid) ?: return
         grid.removeAllViews()
@@ -1920,6 +1950,35 @@ class MainActivity : AppCompatActivity() {
         }
         root.findViewById<View>(R.id.diskOpenFiles).setOnClickListener {
             startActivity(Intent(this, FilesActivity::class.java))
+        }
+    }
+
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun enableStartMenuDrag(panel: View) {
+        val handle = panel.findViewById<View>(R.id.startDragHandle) ?: panel
+        if (handle.getTag(0x51A7) == true) return
+        handle.setTag(0x51A7, true)
+        var dX = 0f
+        var dY = 0f
+        handle.setOnTouchListener { _, e ->
+            val parent = panel.parent as? View ?: return@setOnTouchListener false
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    dX = e.rawX - panel.x
+                    dY = e.rawY - panel.y
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val maxX = (parent.width - panel.width).toFloat().coerceAtLeast(0f)
+                    val maxY = (parent.height - panel.height).toFloat().coerceAtLeast(0f)
+                    panel.x = (e.rawX - dX).coerceIn(0f, maxX)
+                    panel.y = (e.rawY - dY).coerceIn(0f, maxY)
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> true
+                else -> false
+            }
         }
     }
 

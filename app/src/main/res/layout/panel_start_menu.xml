@@ -10,15 +10,28 @@
     android:clickable="true"
     android:focusable="true">
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/startDragHandle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Başlat"
-        android:textColor="#B8FF1A"
-        android:textStyle="bold"
-        android:textSize="14sp"
-        android:paddingBottom="8dp"
-        android:paddingStart="4dp" />
+        android:layout_height="36dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="4dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Başlat  ·  sürükle"
+            android:textColor="#B8FF1A"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⋮⋮"
+            android:textColor="#66FFFFFF"
+            android:textSize="14sp" />
+    </LinearLayout>
 
     <GridLayout
         android:id="@+id/startPinnedGrid"
