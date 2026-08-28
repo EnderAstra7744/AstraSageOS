@@ -1,5 +1,7 @@
 package com.astrasage.os
 
+import com.astrasage.os.desktop.DesktopManager
+
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -73,7 +75,10 @@ class TerminalActivity : AppCompatActivity() {
         val cmd = parts.first().lowercase()
         val args = parts.drop(1)
         when (cmd) {
-            "help" -> append(
+            "as" -> {
+                    append(DesktopManager.listStatus()+"\n")
+                }
+                "help" -> append(
                 """
                 |pwd          — çalışma dizini
                 |ls [yol]     — listele

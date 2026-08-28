@@ -115,4 +115,12 @@ object Prefs {
     fun getIconPositions(ctx: Context) = prefs(ctx).getString("positions", "{}") ?: "{}"
     fun setIconPositions(ctx: Context, json: String) =
         prefs(ctx).edit().putString("positions", json).apply()
+
+    fun getActiveDesktop(ctx: Context) = prefs(ctx).getString("active_de", "astraui") ?: "astraui"
+    fun setActiveDesktop(ctx: Context, id: String) = prefs(ctx).edit().putString("active_de", id).apply()
+
+    fun getGridLayout(ctx: Context, deId: String) =
+        prefs(ctx).getString("grid_$deId", "{}") ?: "{}"
+    fun setGridLayout(ctx: Context, deId: String, json: String) =
+        prefs(ctx).edit().putString("grid_$deId", json).apply()
 }

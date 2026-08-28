@@ -1,5 +1,11 @@
 package com.astrasage.os
 
+import com.astrasage.os.desktop.DesktopManager
+import com.astrasage.os.desktop.DesktopEnvironment
+import com.astrasage.os.desktop.GridCell
+import com.astrasage.os.desktop.GridOverlay
+import com.astrasage.os.desktop.TaskbarStyle
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -52,6 +58,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var clockView: TextView
     private lateinit var wallpaper: ImageView
     private lateinit var welcomeOverlay: View
+    private var gridOverlay: GridOverlay? = null
+    private var cellW = 1f
+    private var cellH = 1f
+    private var gridOriginX = 12f
+    private var gridOriginY = 12f
 
     private var allApps: List<AppInfo> = emptyList()
     private val iconViews = mutableMapOf<String, View>()
@@ -88,6 +99,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        DesktopManager.init(this)
+        DesktopManager.setListener { de ->
+            applyDesktopEnvironment(de)
+            layoutDesktop()
+            refreshTaskbar()
+        }
 
         desktop = findViewById(R.id.desktop)
         windowsHost = findViewById(R.id.windowsHost)
@@ -100,8 +117,15 @@ class MainActivity : AppCompatActivity() {
 
         applyCustomWallpaper()
 
+        findViewById<View>(R.id.btnCenterLogo)?.setOnClickListener { openDeSelector() }
         findViewById<View>(R.id.btnStart).setOnClickListener {
+            // AstraSage logo → Desktop Environment selector (center control)
+            openDeSelector()
+        }
+        // Long-press logo still toggles classic start menu
+        findViewById<View>(R.id.btnStart).setOnLongClickListener {
             startMenu.isVisible = !startMenu.isVisible
+            true
         }
         findViewById<View>(R.id.menuAst).setOnClickListener { hideStart(); openInternal("ast", "AST Terminal") }
         findViewById<View>(R.id.menuFiles).setOnClickListener { hideStart(); openInternal("files", "Dosya Gezgini") }
@@ -120,6 +144,7 @@ class MainActivity : AppCompatActivity() {
         setupWelcome()
 
         allApps = AppRepository.loadLauncherApps(packageManager)
+        applyDesktopEnvironment(DesktopManager.current())
         layoutDesktop()
         refreshTaskbar()
 
@@ -276,8 +301,21 @@ class MainActivity : AppCompatActivity() {
         iconViews.clear()
         selectedKeys.clear()
 
+        val de = DesktopManager.current()
+        val gm = DesktopManager.grid()
+        // Snapshot preferred cells then clear so stale keys don't block
+        val preferredCells = gm.occupiedCells().toMap()
+        gm.clear()
+        // restore preferred into a side map used by placeIcon via temporary re-fill
+        preferredCells.forEach { (k, c) -> gm.place(k, c) }
+        // We'll re-place only icons we create; remove all first
+        gm.clear()
+        preferredCells.forEach { (k, c) -> /* keep for lookup */ }
+        // Store on desktop tag for placeIcon
+        desktop.tag = preferredCells
+
         val density = resources.displayMetrics.density
-        val scale = Prefs.getIconScale(this).coerceIn(0.7f, 1.5f)
+        val scale = (Prefs.getIconScale(this) * (if (de.largeTouch) 1.1f else 1f)).coerceIn(0.7f, 1.5f)
         val showNames = Prefs.showIconNames(this)
         // Cell wide enough for 2-line truncated names without spilling into next icon
         val iconW = (80 * density * scale).toInt().coerceIn((64 * density).toInt(), (110 * density).toInt())
@@ -288,7 +326,9 @@ class MainActivity : AppCompatActivity() {
         val gapX = (14 * density).toInt()
         val gapY = (14 * density).toInt()
         val usableW = (desktop.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels) - leftPad
-        val cols = (usableW / (iconW + gapX)).coerceIn(4, 7)
+        val cols = DesktopManager.current().gridCols
+        gm.cols = cols
+        if (gm.rows < DesktopManager.current().gridRows) gm.rows = DesktopManager.current().gridRows
         val positions = loadPositions()
         val recycle = Prefs.getRecycle(this)
         val hidden = Prefs.getHiddenApps(this)
@@ -411,6 +451,8 @@ class MainActivity : AppCompatActivity() {
             })
             index++
         }
+        DesktopManager.saveLayout(this)
+        ensureGridOverlay()
     }
 
     private fun styleIconLabel(label: TextView, text: String) {
@@ -454,20 +496,20 @@ class MainActivity : AppCompatActivity() {
         view: View, key: String, index: Int, positions: JSONObject,
         leftPad: Int, topPad: Int, iconW: Int, iconH: Int, gapX: Int, gapY: Int, cols: Int
     ) {
-        val saved = positions.optJSONObject(key)
-        val x: Int
-        val y: Int
-        if (saved != null) {
-            x = saved.optInt("x", leftPad)
-            y = saved.optInt("y", topPad)
-        } else {
-            val col = index % cols
-            val row = index / cols
-            x = leftPad + col * (iconW + gapX)
-            y = topPad + row * (iconH + gapY)
-        }
-        view.x = x.toFloat()
-        view.y = y.toFloat()
+        val gm = DesktopManager.grid()
+        cellW = (iconW + gapX).toFloat()
+        cellH = (iconH + gapY).toFloat()
+        gridOriginX = leftPad.toFloat()
+        gridOriginY = topPad.toFloat()
+
+        @Suppress("UNCHECKED_CAST")
+        val prefMap = desktop.tag as? Map<String, GridCell>
+        val preferred = prefMap?.get(key)
+        val cell = gm.placeOrNextFree(key, preferred ?: GridCell(index % maxOf(gm.cols, 1), index / maxOf(gm.cols, 1)))
+        val x = gm.pixelX(cell, cellW, gridOriginX)
+        val y = gm.pixelY(cell, cellH, gridOriginY)
+        view.x = x
+        view.y = y
         desktop.addView(view, FrameLayout.LayoutParams(iconW, iconH))
         iconViews[key] = view
         updateSelectedBg(view, key)
@@ -510,18 +552,14 @@ class MainActivity : AppCompatActivity() {
                         val maxY = (desktop.height - v.height).toFloat().coerceAtLeast(0f)
                         var nx = (startX + dx).coerceIn(0f, maxX)
                         var ny = (startY + dy).coerceIn(0f, maxY)
-                        val ddx = nx - v.x; val ddy = ny - v.y
-                        if (selectedKeys.contains(key) && selectedKeys.size > 1) {
-                            selectedKeys.forEach { k ->
-                                iconViews[k]?.let { iv ->
-                                    iv.x = (iv.x + ddx).coerceIn(0f, maxX)
-                                    iv.y = (iv.y + ddy).coerceIn(0f, maxY)
-                                }
-                            }
-                        } else {
-                            v.x = nx; v.y = ny
+                        v.x = nx; v.y = ny
+                        // Grid guide
+                        gridOverlay?.let { go ->
+                            go.show = true
+                            val col = ((nx + v.width / 2f - gridOriginX) / cellW).toInt()
+                            val row = ((ny + v.height / 2f - gridOriginY) / cellH).toInt()
+                            go.setHighlight(col, row)
                         }
-                        // Visual feedback when over trash
                         val over = key != "sys:trash" && isOverTrash(v)
                         iconViews["sys:trash"]?.alpha = if (over) 0.55f else 1f
                     }
@@ -536,14 +574,22 @@ class MainActivity : AppCompatActivity() {
                         dragging = false
                         // Drop on trash → remove from desktop only
                         if (moved && key != "sys:trash" && isOverTrash(v)) {
+                            gridOverlay?.show = false
+                            gridOverlay?.invalidate()
+                            DesktopManager.grid().remove(key)
                             sendToTrash(key)
                             return@setOnTouchListener true
                         }
-                        if (selectedKeys.contains(key) && selectedKeys.size > 1) {
-                            selectedKeys.forEach { k -> iconViews[k]?.let { savePos(k, it.x, it.y) } }
-                        } else {
-                            savePos(key, v.x, v.y)
-                        }
+                        // GRID SNAP — never free-pixel; no overlap
+                        val gm = DesktopManager.grid()
+                        val cx = v.x + v.width / 2f
+                        val cy = v.y + v.height / 2f
+                        val cell = gm.snapToNearest(key, cx, cy, cellW, cellH, gridOriginX, gridOriginY)
+                        v.x = gm.pixelX(cell, cellW, gridOriginX)
+                        v.y = gm.pixelY(cell, cellH, gridOriginY)
+                        DesktopManager.saveLayout(this@MainActivity)
+                        gridOverlay?.show = false
+                        gridOverlay?.invalidate()
                     } else if (!moved) {
                         val now = System.currentTimeMillis()
                         if (key == lastTapKey && now - lastTapTime < 350) {
@@ -772,6 +818,9 @@ class MainActivity : AppCompatActivity() {
             )
             "options" -> content.addView(
                 LayoutInflater.from(this).inflate(R.layout.panel_options, content, false).also { fillOptions(it) }
+            )
+            "deselector" -> content.addView(
+                LayoutInflater.from(this).inflate(R.layout.panel_de_selector, content, false).also { fillDeSelector(it) }
             )
         }
 
@@ -1230,7 +1279,27 @@ class MainActivity : AppCompatActivity() {
             append("$ $cmd\n")
             val p = cmd.split(Regex("\\s+"))
             when (p[0].lowercase()) {
-                "help" -> append("pwd ls cd neofetch clear exit\n")
+                                "help" -> append("pwd ls cd neofetch clear exit | as desktop [list|current|switch <name>]\n")
+                "as" -> {
+                    if (p.size >= 2 && p[1].equals("desktop", true)) {
+                        when {
+                            p.size == 2 || (p.size >= 3 && p[2] == "list") -> {
+                                append("Desktop Environments:\n")
+                                append(DesktopManager.listStatus() + "\n")
+                            }
+                            p.size >= 3 && p[2] == "current" -> {
+                                append("Current Desktop Environment: ${DesktopManager.current().displayName}\n")
+                            }
+                            p.size >= 4 && p[2] == "switch" -> {
+                                val name = p.subList(3, p.size).joinToString(" ")
+                                append("Switching Desktop Environment...\n")
+                                val de = DesktopManager.switchTo(this@MainActivity, name)
+                                append("${de.displayName} loaded.\n")
+                            }
+                            else -> append("usage: as desktop [list|current|switch <name>]\n")
+                        }
+                    } else append("usage: as desktop ...\n")
+                }
                 "clear" -> output.text = ""
                 "pwd" -> append(cwd.absolutePath + "\n")
                 "ls" -> {
@@ -1390,6 +1459,72 @@ class MainActivity : AppCompatActivity() {
             layoutDesktop()
             Toast.makeText(this, "Uygulandı", Toast.LENGTH_SHORT).show()
             closeWindow("options")
+        }
+    }
+
+
+    private fun applyDesktopEnvironment(de: DesktopEnvironment) {
+        val d = resources.displayMetrics.density
+        val barH = (de.taskbarHeightDp * d).toInt()
+        findViewById<View>(R.id.bottomBar)?.layoutParams?.let {
+            it.height = barH
+            findViewById<View>(R.id.bottomBar)?.layoutParams = it
+        }
+        when (de.taskbarStyle) {
+            TaskbarStyle.CLASSIC_BAR -> findViewById<View>(R.id.bottomBar)?.setBackgroundColor(0xE0222222.toInt())
+            TaskbarStyle.MINIMAL_STRIP -> findViewById<View>(R.id.bottomBar)?.setBackgroundColor(0xCC111111.toInt())
+            TaskbarStyle.FLOW_BOTTOM -> findViewById<View>(R.id.bottomBar)?.setBackgroundColor(0xF01A1A1A.toInt())
+            else -> findViewById<View>(R.id.bottomBar)?.setBackgroundResource(R.drawable.bg_taskbar)
+        }
+    }
+
+    private fun openDeSelector() {
+        hideStart()
+        openInternal("deselector", "Desktop Environments")
+    }
+
+    private fun fillDeSelector(root: View) {
+        val list = root.findViewById<LinearLayout>(R.id.deList)
+        list.removeAllViews()
+        val active = DesktopManager.current()
+        DesktopManager.all().forEach { de ->
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(16, 14, 16, 14)
+                setBackgroundResource(
+                    if (de.id == active.id) R.drawable.bg_choice_sel else R.drawable.bg_choice
+                )
+                val lp = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                lp.bottomMargin = 10
+                layoutParams = lp
+                setOnClickListener {
+                    DesktopManager.switchTo(this@MainActivity, de.id)
+                    closeWindow("deselector")
+                    Toast.makeText(this@MainActivity, de.displayName + " yüklendi", Toast.LENGTH_SHORT).show()
+                }
+            }
+            val title = if (de.id == active.id) "${de.emoji}  ${de.displayName}  ✓ ACTIVE" else "${de.emoji}  ${de.displayName}"
+            row.addView(TextView(this).apply {
+                text = title
+                setTextColor(if (de.id == active.id) de.accentArgb else 0xFFEEEEEE.toInt())
+                textSize = 15f
+                setTypeface(null, android.graphics.Typeface.BOLD)
+            })
+            row.addView(TextView(this).apply {
+                text = de.description
+                setTextColor(0x99FFFFFF.toInt())
+                textSize = 12f
+                setPadding(0, 4, 0, 0)
+            })
+            row.addView(TextView(this).apply {
+                text = "Grid ${de.gridCols}×${de.gridRows}"
+                setTextColor(0x66FFFFFF.toInt())
+                textSize = 11f
+            })
+            list.addView(row)
         }
     }
 
