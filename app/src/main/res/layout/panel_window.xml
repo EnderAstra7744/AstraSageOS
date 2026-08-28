@@ -5,16 +5,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/bg_panel_window"
-    android:elevation="24dp">
+    android:elevation="16dp">
 
     <LinearLayout
         android:id="@+id/panelTitleBar"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="32dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="10dp"
-        android:paddingEnd="4dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="2dp"
         android:background="@drawable/bg_panel_title">
 
         <TextView
@@ -22,47 +22,47 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="@color/text"
-            android:textSize="13sp"
-            android:textStyle="bold"
+            android:textColor="#EEEEEE"
+            android:textSize="12sp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:text="Pencere" />
+            android:text="Window" />
 
         <TextView
             android:id="@+id/btnMinimize"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:gravity="center"
             android:text="─"
-            android:textColor="@color/text_dim"
-            android:textSize="14sp"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp"
             android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/btnMaximize"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:gravity="center"
             android:text="□"
-            android:textColor="@color/text_dim"
-            android:textSize="12sp"
+            android:textColor="#AAAAAA"
+            android:textSize="11sp"
             android:background="?attr/selectableItemBackgroundBorderless" />
 
         <TextView
             android:id="@+id/btnClose"
             android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_height="32dp"
             android:gravity="center"
             android:text="✕"
-            android:textColor="@color/danger"
-            android:textSize="13sp"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:background="#E81123" />
     </LinearLayout>
 
     <FrameLayout
         android:id="@+id/panelContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="#FF242424" />
 </LinearLayout>

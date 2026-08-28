@@ -56,6 +56,8 @@ class MainActivity : AppCompatActivity() {
     private var allApps: List<AppInfo> = emptyList()
     private val iconViews = mutableMapOf<String, View>()
     private val selectedKeys = mutableSetOf<String>()
+    private var lastTapTime = 0L
+    private var lastTapKey = ""
     private val openWindows = linkedMapOf<String, WindowState>()
     private var zCounter = 10
 
@@ -119,6 +121,7 @@ class MainActivity : AppCompatActivity() {
 
         allApps = AppRepository.loadLauncherApps(packageManager)
         layoutDesktop()
+        refreshTaskbar()
 
         if (!Prefs.isWelcomeDone(this)) {
             welcomeOverlay.isVisible = true
@@ -274,13 +277,14 @@ class MainActivity : AppCompatActivity() {
         selectedKeys.clear()
 
         val density = resources.displayMetrics.density
-        val iconW = (76 * density).toInt()
-        val iconH = (90 * density).toInt()
-        val topPad = (24 * density).toInt()
+        val scale = Prefs.getIconScale(this).coerceIn(0.7f, 1.5f)
+        val iconW = (76 * density * scale).toInt()
+        val iconH = (90 * density * scale).toInt()
+        val topPad = (16 * density).toInt()
         val leftPad = (8 * density).toInt()
-        val gapX = (4 * density).toInt()
-        val gapY = (6 * density).toInt()
-        val cols = 4
+        val gapX = (6 * density * scale).toInt()
+        val gapY = (8 * density * scale).toInt()
+        val cols = if (scale > 1.15f) 3 else if (scale < 0.85f) 5 else 4
         val positions = loadPositions()
         val recycle = Prefs.getRecycle(this)
         val hidden = Prefs.getHiddenApps(this)
@@ -500,12 +504,77 @@ class MainActivity : AppCompatActivity() {
                             savePos(key, v.x, v.y)
                         }
                     } else if (!moved) {
-                        if (selectedKeys.isNotEmpty()) toggleSelect(key) else onOpen()
+                        val now = System.currentTimeMillis()
+                        if (key == lastTapKey && now - lastTapTime < 350) {
+                            // Double tap → Windows-style context menu
+                            showDesktopContextMenu(v, key, onOpen)
+                            lastTapTime = 0
+                            lastTapKey = ""
+                        } else {
+                            lastTapTime = now
+                            lastTapKey = key
+                            // single tap delay slightly so double-tap can cancel open
+                            v.postDelayed({
+                                if (lastTapKey == key && System.currentTimeMillis() - lastTapTime >= 340) {
+                                    if (selectedKeys.isNotEmpty()) toggleSelect(key) else onOpen()
+                                    lastTapKey = ""
+                                }
+                            }, 360)
+                        }
                     }
                     true
                 }
                 else -> false
             }
+        }
+    }
+
+    private fun showDesktopContextMenu(anchor: View, key: String, onOpen: () -> Unit) {
+        val popup = android.widget.PopupMenu(this, anchor)
+        popup.menu.add(0, 1, 0, "Aç")
+        popup.menu.add(0, 2, 1, "İkon: Küçük")
+        popup.menu.add(0, 3, 2, "İkon: Normal")
+        popup.menu.add(0, 4, 3, "İkon: Büyük")
+        popup.menu.add(0, 5, 4, "Yeni klasör")
+        popup.menu.add(0, 6, 5, "Yeni dosya")
+        if (key != "sys:trash") popup.menu.add(0, 7, 6, "Çöp kutusuna taşı")
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                1 -> onOpen()
+                2 -> { Prefs.setIconScale(this, 0.75f); layoutDesktop() }
+                3 -> { Prefs.setIconScale(this, 1.0f); layoutDesktop() }
+                4 -> { Prefs.setIconScale(this, 1.35f); layoutDesktop() }
+                5 -> createDesktopFolder()
+                6 -> createDesktopFile()
+                7 -> sendToTrash(key)
+            }
+            true
+        }
+        popup.show()
+    }
+
+    private fun createDesktopFolder() {
+        val name = "Yeni Klasör ${System.currentTimeMillis() % 1000}"
+        val dir = File(RealFs.home(), name)
+        if (dir.mkdirs()) {
+            Prefs.addDesktopPin(this, dir.absolutePath)
+            Toast.makeText(this, "Klasör: $name", Toast.LENGTH_SHORT).show()
+            layoutDesktop()
+        } else {
+            Toast.makeText(this, "Klasör oluşturulamadı (izin?)", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun createDesktopFile() {
+        val name = "not ${System.currentTimeMillis() % 1000}.txt"
+        val f = File(RealFs.home(), name)
+        try {
+            f.writeText("AstraSage OS\n")
+            Prefs.addDesktopPin(this, f.absolutePath)
+            Toast.makeText(this, "Dosya: $name", Toast.LENGTH_SHORT).show()
+            layoutDesktop()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Dosya oluşturulamadı: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -567,12 +636,49 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    if (banding) { banding = false; selection.clear() }
+                    if (banding) {
+                        val w = kotlin.math.abs(event.x - bandStartX)
+                        val h = kotlin.math.abs(event.y - bandStartY)
+                        banding = false
+                        selection.clear()
+                        // short tap on empty desktop → context menu
+                        if (w < 12 && h < 12) {
+                            showEmptyDesktopMenu(event.x, event.y)
+                        }
+                    }
                     true
                 }
                 else -> false
             }
         }
+    }
+
+    private fun showEmptyDesktopMenu(x: Float, y: Float) {
+        val anchor = View(this).apply {
+            layoutParams = FrameLayout.LayoutParams(1, 1)
+            this.x = x; this.y = y
+        }
+        desktop.addView(anchor)
+        val popup = android.widget.PopupMenu(this, anchor)
+        popup.menu.add(0, 1, 0, "Yeni klasör")
+        popup.menu.add(0, 2, 1, "Yeni dosya")
+        popup.menu.add(0, 3, 2, "İkon: Küçük")
+        popup.menu.add(0, 4, 3, "İkon: Normal")
+        popup.menu.add(0, 5, 4, "İkon: Büyük")
+        popup.menu.add(0, 6, 5, "Yenile")
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                1 -> createDesktopFolder()
+                2 -> createDesktopFile()
+                3 -> { Prefs.setIconScale(this, 0.75f); layoutDesktop() }
+                4 -> { Prefs.setIconScale(this, 1.0f); layoutDesktop() }
+                5 -> { Prefs.setIconScale(this, 1.35f); layoutDesktop() }
+                6 -> layoutDesktop()
+            }
+            true
+        }
+        popup.setOnDismissListener { desktop.removeView(anchor) }
+        popup.show()
     }
 
     private fun selectIconsInRect(r: android.graphics.RectF) {
@@ -763,61 +869,51 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshTaskbar() {
         taskbarApps.removeAllViews()
-        fun addDockIcon(resId: Int?, label: String, onClick: () -> Unit) {
+        fun addDock(label: String, emoji: String? = null, resId: Int? = null, onClick: () -> Unit) {
             val wrap = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = android.view.Gravity.CENTER
-                setPadding(10, 4, 10, 4)
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                setPadding(12, 6, 12, 6)
                 setOnClickListener { onClick() }
-                background = ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_choice)
+                setBackgroundResource(R.drawable.bg_dock_item)
                 val lp = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.MATCH_PARENT
                 )
-                lp.marginEnd = 4
+                lp.marginEnd = 6
                 layoutParams = lp
             }
             if (resId != null) {
                 wrap.addView(ImageView(this).apply {
                     setImageResource(resId)
-                    layoutParams = LinearLayout.LayoutParams(28, 28)
+                    layoutParams = LinearLayout.LayoutParams(22, 22)
                     scaleType = ImageView.ScaleType.FIT_CENTER
                 })
-            } else {
+            } else if (emoji != null) {
                 wrap.addView(TextView(this).apply {
-                    text = label.take(1)
-                    setTextColor(ContextCompat.getColor(this@MainActivity, R.color.accent))
-                    textSize = 12f
-                    gravity = android.view.Gravity.CENTER
+                    text = emoji
+                    textSize = 14f
+                    setPadding(0, 0, 6, 0)
                 })
             }
+            wrap.addView(TextView(this).apply {
+                text = label
+                setTextColor(0xFFEEEEEE.toInt())
+                textSize = 11f
+                maxLines = 1
+            })
             taskbarApps.addView(wrap)
         }
-        addDockIcon(R.drawable.ast_icon, "AST") { openInternal("ast", "AST Terminal") }
-        addDockIcon(null, "F") { openInternal("files", "Dosya Gezgini") }
-        addDockIcon(null, "S") { openPlayStore() }
+        addDock("AST", resId = R.drawable.ast_icon) { openInternal("ast", "AST Terminal") }
+        addDock("Dosyalar", emoji = "📁") { openInternal("files", "Dosya Gezgini") }
+        addDock("Store", emoji = "🛒") { openPlayStore() }
         openWindows.values.forEach { w ->
-            addDockIcon(null, w.title.take(1)) {
+            val mark = if (w.minimized) "• " else ""
+            addDock(mark + w.title.take(12), emoji = "▣") {
                 if (w.minimized) restoreWindow(w.id) else bringFront(w.id)
             }
         }
-        // All apps — ☰ (üç çizgi)
-        val allBtn = TextView(this).apply {
-            text = "☰"
-            setTextColor(ContextCompat.getColor(this@MainActivity, R.color.accent))
-            textSize = 20f
-            gravity = android.view.Gravity.CENTER
-            setPadding(16, 4, 16, 4)
-            setBackgroundResource(R.drawable.bg_choice)
-            setOnClickListener { openAppDrawer() }
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-            lp.marginStart = 4
-            layoutParams = lp
-        }
-        taskbarApps.addView(allBtn)
+        addDock("Uygulamalar", emoji = "☰") { openAppDrawer() }
     }
 
     private var drawerOverlay: View? = null

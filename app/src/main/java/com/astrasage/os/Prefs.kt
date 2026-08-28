@@ -32,6 +32,8 @@ object Prefs {
     fun setDarkTheme(ctx: Context, v: Boolean) = prefs(ctx).edit().putBoolean("dark_theme", v).apply()
 
     fun getFontScale(ctx: Context) = prefs(ctx).getFloat("font_scale", 1.0f)
+    fun getIconScale(ctx: Context) = prefs(ctx).getFloat("icon_scale", 1.0f)
+    fun setIconScale(ctx: Context, v: Float) = prefs(ctx).edit().putFloat("icon_scale", v).apply()
     fun setFontScale(ctx: Context, v: Float) = prefs(ctx).edit().putFloat("font_scale", v).apply()
 
     fun getDesktopPins(ctx: Context): Set<String> =
