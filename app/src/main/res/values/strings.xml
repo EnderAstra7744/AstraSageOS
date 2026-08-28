@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AstraSage OS</string>
+    <string name="search_hint">Uygulama ara…</string>
+    <string name="ast_terminal">AST Terminal</string>
+    <string name="no_apps">Uygulama bulunamadı</string>
+    <string name="open_failed">Uygulama açılamadı</string>
+    <string name="files">Dosya Gezgini</string>
+</resources>
