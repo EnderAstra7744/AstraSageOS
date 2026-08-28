@@ -350,8 +350,18 @@ class MainActivity : AppCompatActivity() {
             index++
         }
 
+        // Order matches default screen: AST → PC → Docs → DL → Trash → Cal → Net → Control → Options
+        if (!recycle.contains("sys:ast")) {
+            val astView = LayoutInflater.from(this).inflate(R.layout.item_desktop_icon, desktop, false)
+            astView.findViewById<ImageView>(R.id.appIcon).setImageResource(R.drawable.ast_icon)
+            styleIconLabel(astView.findViewById(R.id.appLabel), "AST")
+            placeIcon(astView, "sys:ast", index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
+            bindIconTouch(astView, "sys:ast", onOpen = { openInternal("ast", "AST Terminal") }, onDelete = {
+                Prefs.moveToRecycle(this, "sys:ast"); layoutDesktop()
+            })
+            index++
+        }
         sys("sys:thispc", "Bu Bilgisayar", R.drawable.ic_thispc) { openInternal("thispc", "Bu Bilgisayar") }
-        sys("sys:trash", "Çöp Kutusu", R.drawable.ic_trash) { openInternal("trash", "Çöp Kutusu") }
         sys("sys:docs", "Belgeler", R.drawable.ic_docs) {
             Prefs.addDesktopPin(this, RealFs.home().absolutePath)
             openInternal("files", "Dosya Gezgini")
@@ -363,16 +373,7 @@ class MainActivity : AppCompatActivity() {
             if (dl != null) Prefs.addDesktopPin(this, dl.absolutePath)
             startActivity(Intent(this, FilesActivity::class.java))
         }
-        if (!recycle.contains("sys:ast")) {
-            val astView = LayoutInflater.from(this).inflate(R.layout.item_desktop_icon, desktop, false)
-            astView.findViewById<ImageView>(R.id.appIcon).setImageResource(R.drawable.ast_icon)
-            styleIconLabel(astView.findViewById(R.id.appLabel), "AST")
-            placeIcon(astView, "sys:ast", index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
-            bindIconTouch(astView, "sys:ast", onOpen = { openInternal("ast", "AST Terminal") }, onDelete = {
-                Prefs.moveToRecycle(this, "sys:ast"); layoutDesktop()
-            })
-            index++
-        }
+        sys("sys:trash", "Çöp Kutusu", R.drawable.ic_trash) { openInternal("trash", "Çöp Kutusu") }
         sys("sys:calendar", "Takvim", R.drawable.ic_calendar) { openInternal("calendar", "Takvim / Saat") }
         sys("sys:network", "Ağ", R.drawable.ic_network) {
             try {
@@ -1387,76 +1388,42 @@ class MainActivity : AppCompatActivity() {
         val input = root.findViewById<android.widget.EditText>(R.id.input)
         val scroll = root.findViewById<android.widget.ScrollView>(R.id.scroll)
         root.findViewById<View>(R.id.btnClose)?.isVisible = false
-        var cwd = RealFs.root()
-        fun append(s: String) {
-            output.append(s)
-            scroll.post { scroll.fullScroll(View.FOCUS_DOWN) }
+        val engine = AstEngine(this) { s ->
+            when {
+                s.startsWith("\u0000CLEAR") -> output.text = ""
+                s.startsWith("\u0000EXIT") -> closeWindow("ast")
+                else -> {
+                    output.append(s)
+                    scroll.post { scroll.fullScroll(View.FOCUS_DOWN) }
+                }
+            }
         }
-        append("AST (panel) · ${cwd.absolutePath}\nhelp | pwd | ls | cd | neofetch\n\n")
+        output.text = ""
+        engine.banner()
+        output.append(engine.prompt())
         input.setOnEditorActionListener { _, _, _ ->
-            val cmd = input.text?.toString()?.trim().orEmpty()
+            val cmd = input.text?.toString().orEmpty()
             input.setText("")
-            if (cmd.isEmpty()) return@setOnEditorActionListener true
-            append("$ $cmd\n")
-            val p = cmd.split(Regex("\\s+"))
-            when (p[0].lowercase()) {
-                                "help" -> append("pwd ls cd neofetch clear exit | as desktop [list|current|switch <name>]\n")
-                "as" -> {
-                    if (p.size >= 2 && p[1].equals("desktop", true)) {
-                        when {
-                            p.size == 2 || (p.size >= 3 && p[2] == "list") -> {
-                                append("Desktop Environments:\n")
-                                append(DesktopManager.listStatus() + "\n")
-                            }
-                            p.size >= 3 && p[2] == "current" -> {
-                                append("Current Desktop Environment: ${DesktopManager.current().displayName}\n")
-                            }
-                            p.size >= 4 && p[2] == "switch" -> {
-                                val name = p.subList(3, p.size).joinToString(" ")
-                                append("Switching Desktop Environment...\n")
-                                val de = DesktopManager.switchTo(this@MainActivity, name)
-                                append("${de.displayName} loaded.\n")
-                            }
-                            else -> append("usage: as desktop [list|current|switch <name>]\n")
-                        }
-                    } else append("usage: as desktop ...\n")
-                }
-                "clear" -> output.text = ""
-                "pwd" -> append(cwd.absolutePath + "\n")
-                "ls" -> {
-                    val list = RealFs.list(cwd)
-                    append(list.joinToString("  ") { if (it.isDirectory) it.name + "/" else it.name } + "\n")
-                }
-                "cd" -> {
-                    val t = if (p.size < 2 || p[1] == "~") RealFs.home()
-                    else if (p[1].startsWith("/")) File(p[1]) else File(cwd, p[1])
-                    if (t.isDirectory && t.canRead()) cwd = t else append("cd: hata\n")
-                }
-                "neofetch" -> append("AstraSage OS · ${Build.MODEL} · Android ${Build.VERSION.RELEASE}\n")
-                "exit" -> closeWindow("ast")
-                else -> append("ast: $cmd?\n")
+            output.append(cmd + "\n")
+            engine.run(cmd)
+            if (!cmd.trim().equals("exit", true)) {
+                output.append(engine.prompt())
             }
             true
         }
     }
 
 
+    /** Default desktop apps — screen order (gallery, chrome, files, settings, phone, clock) */
     private val ESSENTIAL_PACKAGES = listOf(
+        "com.google.android.apps.photos", "com.sec.android.gallery3d", "com.samsung.android.gallery3d",
         "com.android.chrome", "com.chrome.beta", "com.sec.android.app.sbrowser",
-        "com.opera.browser", "org.mozilla.firefox", "com.microsoft.emmx",
-        "com.android.vending", // Play Store → shown as AstraStore open
         "com.google.android.apps.nbu.files", "com.sec.android.app.myfiles",
         "com.android.documentsui", "com.google.android.documentsui",
         "com.android.settings",
         "com.google.android.dialer", "com.samsung.android.dialer", "com.android.dialer",
-        "com.google.android.apps.messaging", "com.samsung.android.messaging",
-        "com.google.android.GoogleCamera", "com.sec.android.app.camera", "com.android.camera2",
-        "com.google.android.apps.photos", "com.sec.android.gallery3d",
-        "com.google.android.gm", "com.google.android.apps.maps",
-        "com.google.android.youtube", "com.android.calculator2",
-        "com.google.android.calculator", "com.sec.android.app.popupcalculator",
         "com.google.android.deskclock", "com.sec.android.app.clockpackage",
-        "com.google.android.contacts", "com.samsung.android.contacts"
+        "com.samsung.android.app.clockpackage"
     )
 
     private fun isStorePackage(pkg: String) =
@@ -1466,22 +1433,18 @@ class MainActivity : AppCompatActivity() {
         val out = mutableListOf<AppInfo>()
         val seen = mutableSetOf<String>()
         for (pkg in ESSENTIAL_PACKAGES) {
-            val match = all.filter { it.packageName == pkg }
-            match.forEach {
-                if (it.packageName !in seen) {
-                    // Skip raw Play Store icon — we show AstraStore instead
-                    if (it.packageName == "com.android.vending") return@forEach
-                    seen.add(it.packageName)
-                    out.add(it)
-                }
+            val match = all.firstOrNull { it.packageName == pkg } ?: continue
+            if (match.packageName in seen) continue
+            seen.add(match.packageName)
+            out.add(match)
+        }
+        // fallback chrome if missing
+        if (out.none { it.packageName.contains("chrome") }) {
+            all.firstOrNull { it.label.contains("Chrome", true) }?.let {
+                if (it.packageName !in seen) out.add(1.coerceAtMost(out.size), it)
             }
         }
-        // fallback browsers by name
-        if (out.none { it.packageName.contains("chrome") || it.label.contains("Browser", true) }) {
-            all.firstOrNull { it.label.contains("Chrome", true) || it.label.contains("Internet", true) || it.label.contains("Browser", true) }
-                ?.let { out.add(0, it) }
-        }
-        return out.distinctBy { it.packageName }
+        return out
     }
 
     private fun openPlayStore() {
