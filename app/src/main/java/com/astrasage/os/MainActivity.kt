@@ -228,6 +228,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Varsayılan arka plan", Toast.LENGTH_SHORT).show()
         }
         findViewById<View>(R.id.btnGrantStorage).setOnClickListener { requestStorage() }
+        findViewById<View>(R.id.btnPickDesktopApps)?.setOnClickListener { openDesktopAppsPicker() }
         findViewById<View>(R.id.btnWelcomeDone).setOnClickListener {
             Prefs.setWelcomeDone(this, true)
             welcomeOverlay.isVisible = false
@@ -325,10 +326,11 @@ class MainActivity : AppCompatActivity() {
         val leftPad = (12 * density).toInt()
         val gapX = (14 * density).toInt()
         val gapY = (14 * density).toInt()
-        val usableW = (desktop.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels) - leftPad
-        val cols = DesktopManager.current().gridCols
-        gm.cols = cols
+        val usableW = ((desktop.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels) - leftPad - 8).toFloat()
+        val fitCols = maxOf(DesktopManager.current().gridCols, (usableW / (iconW + gapX)).toInt().coerceAtLeast(3))
+        gm.cols = fitCols
         if (gm.rows < DesktopManager.current().gridRows) gm.rows = DesktopManager.current().gridRows
+        val cols = fitCols
         val positions = loadPositions()
         val recycle = Prefs.getRecycle(this)
         val hidden = Prefs.getHiddenApps(this)
@@ -336,9 +338,9 @@ class MainActivity : AppCompatActivity() {
         var index = 0
 
         // System icons first
-        fun sys(key: String, label: String, emoji: String, open: () -> Unit) {
+        fun sys(key: String, label: String, iconRes: Int, open: () -> Unit) {
             if (recycle.contains(key)) return
-            val view = inflateEmojiIcon(label, emoji)
+            val view = inflateResIcon(label, iconRes)
             placeIcon(view, key, index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
             bindIconTouch(view, key, onOpen = open, onDelete = {
                 Prefs.moveToRecycle(this, key)
@@ -348,13 +350,13 @@ class MainActivity : AppCompatActivity() {
             index++
         }
 
-        sys("sys:thispc", "Bu Bilgisayar", "💻") { openInternal("thispc", "Bu Bilgisayar") }
-        sys("sys:trash", "Çöp Kutusu", "🗑️") { openInternal("trash", "Çöp Kutusu") }
-        sys("sys:docs", "Belgeler", "📄") {
+        sys("sys:thispc", "Bu Bilgisayar", R.drawable.ic_thispc) { openInternal("thispc", "Bu Bilgisayar") }
+        sys("sys:trash", "Çöp Kutusu", R.drawable.ic_trash) { openInternal("trash", "Çöp Kutusu") }
+        sys("sys:docs", "Belgeler", R.drawable.ic_docs) {
             Prefs.addDesktopPin(this, RealFs.home().absolutePath)
             openInternal("files", "Dosya Gezgini")
         }
-        sys("sys:downloads", "İndirilenler", "⬇️") {
+        sys("sys:downloads", "İndirilenler", R.drawable.ic_downloads) {
             val dl = android.os.Environment.getExternalStoragePublicDirectory(
                 android.os.Environment.DIRECTORY_DOWNLOADS
             )
@@ -371,25 +373,29 @@ class MainActivity : AppCompatActivity() {
             })
             index++
         }
-        sys("sys:calendar", "Takvim", "📅") { openInternal("calendar", "Takvim / Saat") }
-        sys("sys:network", "Ağ", "🌐") {
+        sys("sys:calendar", "Takvim", R.drawable.ic_calendar) { openInternal("calendar", "Takvim / Saat") }
+        sys("sys:network", "Ağ", R.drawable.ic_network) {
             try {
                 startActivity(Intent(android.provider.Settings.ACTION_WIFI_SETTINGS))
             } catch (_: Exception) {
                 Toast.makeText(this, "Ağ ayarları açılamadı", Toast.LENGTH_SHORT).show()
             }
         }
-        sys("sys:control", "Denetim Masası", "⚙️") {
+        sys("sys:control", "Denetim Masası", R.drawable.ic_control) {
             try {
                 startActivity(Intent(android.provider.Settings.ACTION_SETTINGS))
             } catch (_: Exception) {
                 Toast.makeText(this, "Ayarlar açılamadı", Toast.LENGTH_SHORT).show()
             }
         }
-        sys("sys:options", "Seçenekler", "🎛️") { openOptionsPanel() }
+        sys("sys:options", "Seçenekler", R.drawable.ic_options) { openOptionsPanel() }
 
-        // Only essential apps (browser, store, files, settings, phone, messages, camera…)
-        val essential = essentialApps(allApps)
+        // User-selected desktop apps (welcome / options)
+        val enabledPkgs = Prefs.getDesktopAppsEnabled(this)
+        val configured = Prefs.isDesktopAppsConfigured(this)
+        val essential = if (configured) {
+            allApps.filter { it.packageName in enabledPkgs }
+        } else essentialApps(allApps)
         essential.forEach { app ->
             val pa = "${app.packageName}/${app.activityName}"
             if (hidden.contains(pa)) return@forEach
@@ -409,7 +415,7 @@ class MainActivity : AppCompatActivity() {
         }
         // AstraStore shortcut (opens real Play Store / market)
         if (!recycle.contains("sys:store")) {
-            val view = inflateEmojiIcon("AstraStore", "🛒")
+            val view = inflateResIcon("AstraStore", R.drawable.ic_store)
             // Prefer image: use AS style - keep emoji for store
             placeIcon(view, "sys:store", index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
             bindIconTouch(view, "sys:store", onOpen = { openPlayStore() }, onDelete = {
@@ -495,6 +501,13 @@ class MainActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.item_desktop_icon, desktop, false)
         view.findViewById<ImageView>(R.id.appIcon).setImageDrawable(app.icon)
         styleIconLabel(view.findViewById(R.id.appLabel), app.label)
+        return view
+    }
+
+    private fun inflateResIcon(label: String, iconRes: Int): View {
+        val view = LayoutInflater.from(this).inflate(R.layout.item_desktop_icon, desktop, false)
+        view.findViewById<ImageView>(R.id.appIcon).setImageResource(iconRes)
+        styleIconLabel(view.findViewById(R.id.appLabel), label)
         return view
     }
 
@@ -665,6 +678,38 @@ class MainActivity : AppCompatActivity() {
             true
         }
         popup.show()
+    }
+
+
+    private fun openDesktopAppsPicker() {
+        val apps = allApps.ifEmpty { AppRepository.loadLauncherApps(packageManager) }
+        val labels = apps.map { it.label }.toTypedArray()
+        val pkgs = apps.map { it.packageName }.toTypedArray()
+        val enabled = Prefs.getDesktopAppsEnabled(this).toMutableSet()
+        val checked = BooleanArray(apps.size) { i ->
+            if (!Prefs.isDesktopAppsConfigured(this)) {
+                // default: essentials only
+                pkgs[i] in essentialApps(apps).map { it.packageName }.toSet()
+            } else pkgs[i] in enabled
+        }
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Masaüstünde göster")
+            .setMultiChoiceItems(labels, checked) { _, which, isChecked ->
+                checked[which] = isChecked
+            }
+            .setPositiveButton("Tamam") { _, _ ->
+                val sel = mutableSetOf<String>()
+                checked.forEachIndexed { i, on -> if (on) sel.add(pkgs[i]) }
+                Prefs.setDesktopAppsEnabled(this, sel)
+                layoutDesktop()
+                Toast.makeText(this, "${sel.size} uygulama seçildi", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("Hiçbiri") { _, _ ->
+                Prefs.setDesktopAppsEnabled(this, emptySet())
+                layoutDesktop()
+            }
+            .setNegativeButton("İptal", null)
+            .show()
     }
 
     private fun openOptionsPanel() {
@@ -887,18 +932,32 @@ class MainActivity : AppCompatActivity() {
                 }
                 MotionEvent.ACTION_UP -> {
                     dragging = false
+                    if (!state.maximized) snapPanelToEdge(panel, state)
                     state.normalX = panel.x; state.normalY = panel.y
                     true
                 }
                 else -> false
             }
         }
-        // Two-finger pinch to resize (like trackpad / mouse wheel zoom on desktop)
+        // Corner resize + two-finger pinch (like trackpad / mouse wheel zoom on desktop)
         var startDist = 0f
         var startW = 0
         var startH = 0
+        var cornerResize = false
+        var cStartX = 0f; var cStartY = 0f; var cW = 0; var cH = 0
         panel.setOnTouchListener { v, e ->
             when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    val edge = 56 * resources.displayMetrics.density
+                    if (e.x > v.width - edge && e.y > v.height - edge && !state.maximized) {
+                        cornerResize = true
+                        cStartX = e.rawX; cStartY = e.rawY
+                        cW = v.width; cH = v.height
+                        bringFront(state.id)
+                        return@setOnTouchListener true
+                    }
+                    false
+                }
                 MotionEvent.ACTION_POINTER_DOWN -> {
                     if (e.pointerCount >= 2 && !state.maximized) {
                         val x0 = e.getX(0); val y0 = e.getY(0)
@@ -910,6 +969,16 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
+                    if (cornerResize) {
+                        val minW = (200 * resources.displayMetrics.density).toInt()
+                        val minH = (140 * resources.displayMetrics.density).toInt()
+                        val nw = (cW + (e.rawX - cStartX)).toInt().coerceIn(minW, windowsHost.width)
+                        val nh = (cH + (e.rawY - cStartY)).toInt().coerceIn(minH, windowsHost.height)
+                        v.layoutParams = FrameLayout.LayoutParams(nw, nh)
+                        v.requestLayout()
+                        state.normalW = nw; state.normalH = nh
+                        return@setOnTouchListener true
+                    }
                     if (e.pointerCount >= 2 && startDist > 0f && !state.maximized) {
                         val x0 = e.getX(0); val y0 = e.getY(0)
                         val x1 = e.getX(1); val y1 = e.getY(1)
@@ -935,6 +1004,37 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+
+    private fun snapPanelToEdge(panel: View, state: WindowState) {
+        val hostW = windowsHost.width.toFloat().coerceAtLeast(1f)
+        val hostH = windowsHost.height.toFloat().coerceAtLeast(1f)
+        val threshold = 56 * resources.displayMetrics.density
+        when {
+            panel.x < threshold -> {
+                panel.x = 0f; panel.y = 0f
+                panel.layoutParams = FrameLayout.LayoutParams((hostW / 2).toInt(), hostH.toInt())
+                state.normalW = (hostW / 2).toInt(); state.normalH = hostH.toInt()
+            }
+            panel.x + panel.width > hostW - threshold -> {
+                panel.x = hostW / 2; panel.y = 0f
+                panel.layoutParams = FrameLayout.LayoutParams((hostW / 2).toInt(), hostH.toInt())
+                state.normalW = (hostW / 2).toInt(); state.normalH = hostH.toInt()
+            }
+            panel.y < threshold -> {
+                panel.x = 0f; panel.y = 0f
+                panel.layoutParams = FrameLayout.LayoutParams(hostW.toInt(), (hostH / 2).toInt())
+                state.normalW = hostW.toInt(); state.normalH = (hostH / 2).toInt()
+            }
+            panel.y + panel.height > hostH - threshold -> {
+                panel.x = 0f; panel.y = hostH / 2
+                panel.layoutParams = FrameLayout.LayoutParams(hostW.toInt(), (hostH / 2).toInt())
+                state.normalW = hostW.toInt(); state.normalH = (hostH / 2).toInt()
+            }
+        }
+        panel.requestLayout()
+        state.normalX = panel.x; state.normalY = panel.y
     }
 
     private fun bringFront(id: String) {
@@ -1013,19 +1113,17 @@ class MainActivity : AppCompatActivity() {
             })
         }) { openInternal("ast", "AST Terminal") }
         addDockIconOnly({ w ->
-            w.addView(TextView(this).apply {
-                text = "📁"
-                textSize = 20f
-                gravity = android.view.Gravity.CENTER
+            w.addView(ImageView(this).apply {
+                setImageResource(R.drawable.ic_folder)
                 layoutParams = LinearLayout.LayoutParams(dockSize, dockSize)
+                scaleType = ImageView.ScaleType.FIT_CENTER
             })
         }) { openInternal("files", "Dosya Gezgini") }
         addDockIconOnly({ w ->
-            w.addView(TextView(this).apply {
-                text = "🛒"
-                textSize = 20f
-                gravity = android.view.Gravity.CENTER
+            w.addView(ImageView(this).apply {
+                setImageResource(R.drawable.ic_store)
                 layoutParams = LinearLayout.LayoutParams(dockSize, dockSize)
+                scaleType = ImageView.ScaleType.FIT_CENTER
             })
         }) { openPlayStore() }
         openWindows.values.forEach { win ->
@@ -1042,12 +1140,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         addDockIconOnly({ w ->
-            w.addView(TextView(this).apply {
-                text = "☰"
-                textSize = 20f
-                gravity = android.view.Gravity.CENTER
-                setTextColor(0xFFB8FF1A.toInt())
+            w.addView(ImageView(this).apply {
+                setImageResource(R.drawable.ic_apps)
                 layoutParams = LinearLayout.LayoutParams(dockSize, dockSize)
+                scaleType = ImageView.ScaleType.FIT_CENTER
             })
         }) { openAppDrawer() }
     }
@@ -1480,6 +1576,7 @@ class MainActivity : AppCompatActivity() {
             wallpaper.setImageResource(R.drawable.wallpaper)
             Toast.makeText(this, "Varsayılan arka plan", Toast.LENGTH_SHORT).show()
         }
+        root.findViewById<View>(R.id.optAppsPick)?.setOnClickListener { openDesktopAppsPicker() }
         root.findViewById<View>(R.id.optApply).setOnClickListener {
             layoutDesktop()
             Toast.makeText(this, "Uygulandı", Toast.LENGTH_SHORT).show()

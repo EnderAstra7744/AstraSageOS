@@ -123,4 +123,14 @@ object Prefs {
         prefs(ctx).getString("grid_$deId", "{}") ?: "{}"
     fun setGridLayout(ctx: Context, deId: String, json: String) =
         prefs(ctx).edit().putString("grid_$deId", json).apply()
+
+    /** Package names allowed on desktop (empty = essentials default) */
+    fun getDesktopAppsEnabled(ctx: Context): Set<String> =
+        prefs(ctx).getStringSet("desktop_apps_enabled", null) ?: emptySet()
+
+    fun setDesktopAppsEnabled(ctx: Context, set: Set<String>) =
+        prefs(ctx).edit().putStringSet("desktop_apps_enabled", set).apply()
+
+    fun isDesktopAppsConfigured(ctx: Context) =
+        prefs(ctx).contains("desktop_apps_enabled")
 }

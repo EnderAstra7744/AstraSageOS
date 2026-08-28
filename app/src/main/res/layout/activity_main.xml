@@ -105,8 +105,8 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginEnd="8dp"
-            android:padding="4dp"
-            android:src="@drawable/ic_as_logo"
+            android:padding="6dp"
+            android:src="@drawable/ic_desktop"
             android:scaleType="fitCenter"
             android:background="@drawable/bg_start_btn"
             android:contentDescription="Desktop Environments" />
