@@ -455,6 +455,31 @@ class MainActivity : AppCompatActivity() {
         ensureGridOverlay()
     }
 
+
+    private fun ensureGridOverlay() {
+        if (gridOverlay == null) {
+            val go = GridOverlay(this)
+            desktop.addView(
+                go, 0,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+            )
+            gridOverlay = go
+        }
+        val go = gridOverlay ?: return
+        val gm = DesktopManager.grid()
+        go.cols = gm.cols
+        go.rows = gm.rows
+        go.originX = gridOriginX
+        go.originY = gridOriginY
+        go.cellW = cellW
+        go.cellH = cellH
+        go.show = false
+        go.invalidate()
+    }
+
     private fun styleIconLabel(label: TextView, text: String) {
         // Shorten very long names for display
         val display = if (text.length > 18) text.take(16) + "…" else text
