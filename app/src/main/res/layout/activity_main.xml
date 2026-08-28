@@ -22,7 +22,7 @@
         android:id="@+id/desktop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="52dp"
         android:clipChildren="false"
         android:clipToPadding="false" />
 
@@ -30,14 +30,14 @@
         android:id="@+id/selectionOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="52dp"
         android:visibility="invisible" />
 
     <FrameLayout
         android:id="@+id/windowsHost"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="52dp"
         android:clipChildren="false" />
 
     <FrameLayout
@@ -61,7 +61,7 @@
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="52dp"
         android:layout_gravity="bottom"
         android:orientation="horizontal"
         android:gravity="center_vertical"
@@ -72,8 +72,8 @@
 
         <ImageView
             android:id="@+id/btnStart"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:padding="4dp"
             android:src="@drawable/ic_as_logo"
             android:scaleType="fitCenter"

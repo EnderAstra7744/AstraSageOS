@@ -277,19 +277,18 @@ class MainActivity : AppCompatActivity() {
         selectedKeys.clear()
 
         val density = resources.displayMetrics.density
-        val scale = Prefs.getIconScale(this).coerceIn(0.65f, 1.6f)
+        val scale = Prefs.getIconScale(this).coerceIn(0.7f, 1.5f)
         val showNames = Prefs.showIconNames(this)
-        val baseW = 72f
-        val baseH = if (showNames) 96f else 72f
-        val iconW = (baseW * density * scale).toInt().coerceAtLeast((48 * density).toInt())
-        val iconH = (baseH * density * scale).toInt().coerceAtLeast((48 * density).toInt())
-        val topPad = (12 * density).toInt()
-        val leftPad = (10 * density).toInt()
-        // Keep comfortable gaps even when scale is small
-        val gapX = (10 * density).toInt().coerceAtLeast(8)
-        val gapY = (12 * density).toInt().coerceAtLeast(8)
-        val usableW = desktop.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels
-        val cols = ((usableW - leftPad) / (iconW + gapX)).coerceIn(3, 8)
+        // Cell wide enough for 2-line truncated names without spilling into next icon
+        val iconW = (80 * density * scale).toInt().coerceIn((64 * density).toInt(), (110 * density).toInt())
+        val iconH = ((if (showNames) 100 else 70) * density * scale).toInt()
+            .coerceIn((56 * density).toInt(), (130 * density).toInt())
+        val topPad = (10 * density).toInt()
+        val leftPad = (12 * density).toInt()
+        val gapX = (14 * density).toInt()
+        val gapY = (14 * density).toInt()
+        val usableW = (desktop.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels) - leftPad
+        val cols = (usableW / (iconW + gapX)).coerceIn(4, 7)
         val positions = loadPositions()
         val recycle = Prefs.getRecycle(this)
         val hidden = Prefs.getHiddenApps(this)
@@ -311,7 +310,17 @@ class MainActivity : AppCompatActivity() {
 
         sys("sys:thispc", "Bu Bilgisayar", "💻") { openInternal("thispc", "Bu Bilgisayar") }
         sys("sys:trash", "Çöp Kutusu", "🗑️") { openInternal("trash", "Çöp Kutusu") }
-        sys("sys:files", "Dosyalar", "📁") { openInternal("files", "Dosya Gezgini") }
+        sys("sys:docs", "Belgeler", "📄") {
+            Prefs.addDesktopPin(this, RealFs.home().absolutePath)
+            openInternal("files", "Dosya Gezgini")
+        }
+        sys("sys:downloads", "İndirilenler", "⬇️") {
+            val dl = android.os.Environment.getExternalStoragePublicDirectory(
+                android.os.Environment.DIRECTORY_DOWNLOADS
+            )
+            if (dl != null) Prefs.addDesktopPin(this, dl.absolutePath)
+            startActivity(Intent(this, FilesActivity::class.java))
+        }
         if (!recycle.contains("sys:ast")) {
             val astView = LayoutInflater.from(this).inflate(R.layout.item_desktop_icon, desktop, false)
             astView.findViewById<ImageView>(R.id.appIcon).setImageResource(R.drawable.ast_icon)
@@ -323,6 +332,21 @@ class MainActivity : AppCompatActivity() {
             index++
         }
         sys("sys:calendar", "Takvim", "📅") { openInternal("calendar", "Takvim / Saat") }
+        sys("sys:network", "Ağ", "🌐") {
+            try {
+                startActivity(Intent(android.provider.Settings.ACTION_WIFI_SETTINGS))
+            } catch (_: Exception) {
+                Toast.makeText(this, "Ağ ayarları açılamadı", Toast.LENGTH_SHORT).show()
+            }
+        }
+        sys("sys:control", "Denetim Masası", "⚙️") {
+            try {
+                startActivity(Intent(android.provider.Settings.ACTION_SETTINGS))
+            } catch (_: Exception) {
+                Toast.makeText(this, "Ayarlar açılamadı", Toast.LENGTH_SHORT).show()
+            }
+        }
+        sys("sys:options", "Seçenekler", "🎛️") { openOptionsPanel() }
 
         // Only essential apps (browser, store, files, settings, phone, messages, camera…)
         val essential = essentialApps(allApps)
@@ -390,9 +414,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun styleIconLabel(label: TextView, text: String) {
-        label.text = text
-        val fs = Prefs.getFontScale(this).coerceIn(0.7f, 1.5f)
-        label.textSize = 10f * fs
+        // Shorten very long names for display
+        val display = if (text.length > 18) text.take(16) + "…" else text
+        label.text = display
+        val fs = Prefs.getFontScale(this).coerceIn(0.75f, 1.4f)
+        label.textSize = (9.5f * fs)
+        label.maxLines = 2
+        label.ellipsize = android.text.TextUtils.TruncateAt.END
         label.visibility = if (Prefs.showIconNames(this)) View.VISIBLE else View.GONE
     }
 
@@ -887,19 +915,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshTaskbar() {
         taskbarApps.removeAllViews()
+        val d = resources.displayMetrics.density
+        val dockSize = (36 * d).toInt()
         fun addDockIconOnly(content: (LinearLayout) -> Unit, onClick: () -> Unit) {
             val wrap = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = android.view.Gravity.CENTER
-                setPadding(10, 6, 10, 6)
+                setPadding((6 * d).toInt(), (4 * d).toInt(), (6 * d).toInt(), (4 * d).toInt())
                 setOnClickListener { onClick() }
                 setBackgroundResource(R.drawable.bg_dock_item)
-                minimumWidth = (40 * resources.displayMetrics.density).toInt()
-                val lp = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT
-                )
-                lp.marginEnd = 4
+                val lp = LinearLayout.LayoutParams(dockSize + (12 * d).toInt(), LinearLayout.LayoutParams.MATCH_PARENT)
+                lp.marginEnd = (5 * d).toInt()
                 layoutParams = lp
             }
             content(wrap)
@@ -908,22 +934,34 @@ class MainActivity : AppCompatActivity() {
         addDockIconOnly({ w ->
             w.addView(ImageView(this).apply {
                 setImageResource(R.drawable.ast_icon)
-                layoutParams = LinearLayout.LayoutParams(26, 26)
+                layoutParams = LinearLayout.LayoutParams(dockSize, dockSize)
                 scaleType = ImageView.ScaleType.FIT_CENTER
             })
         }) { openInternal("ast", "AST Terminal") }
         addDockIconOnly({ w ->
-            w.addView(TextView(this).apply { text = "📁"; textSize = 18f })
+            w.addView(TextView(this).apply {
+                text = "📁"
+                textSize = 20f
+                gravity = android.view.Gravity.CENTER
+                layoutParams = LinearLayout.LayoutParams(dockSize, dockSize)
+            })
         }) { openInternal("files", "Dosya Gezgini") }
         addDockIconOnly({ w ->
-            w.addView(TextView(this).apply { text = "🛒"; textSize = 18f })
+            w.addView(TextView(this).apply {
+                text = "🛒"
+                textSize = 20f
+                gravity = android.view.Gravity.CENTER
+                layoutParams = LinearLayout.LayoutParams(dockSize, dockSize)
+            })
         }) { openPlayStore() }
         openWindows.values.forEach { win ->
             addDockIconOnly({ w ->
                 w.addView(TextView(this).apply {
                     text = if (win.minimized) "▢" else "▣"
-                    textSize = 16f
+                    textSize = 18f
+                    gravity = android.view.Gravity.CENTER
                     setTextColor(0xFFB8FF1A.toInt())
+                    layoutParams = LinearLayout.LayoutParams(dockSize, dockSize)
                 })
             }) {
                 if (win.minimized) restoreWindow(win.id) else bringFront(win.id)
@@ -932,8 +970,10 @@ class MainActivity : AppCompatActivity() {
         addDockIconOnly({ w ->
             w.addView(TextView(this).apply {
                 text = "☰"
-                textSize = 18f
+                textSize = 20f
+                gravity = android.view.Gravity.CENTER
                 setTextColor(0xFFB8FF1A.toInt())
+                layoutParams = LinearLayout.LayoutParams(dockSize, dockSize)
             })
         }) { openAppDrawer() }
     }
