@@ -119,25 +119,15 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.btnCenterLogo)?.setOnClickListener { openDeSelector() }
         findViewById<View>(R.id.btnStart).setOnClickListener {
-            // AstraSage logo → Desktop Environment selector (center control)
-            openDeSelector()
+            toggleStartMenu()
         }
-        // Long-press logo still toggles classic start menu
         findViewById<View>(R.id.btnStart).setOnLongClickListener {
-            startMenu.isVisible = !startMenu.isVisible
+            openDeSelector()
             true
         }
-        findViewById<View>(R.id.menuAst).setOnClickListener { hideStart(); openInternal("ast", "AST Terminal") }
-        findViewById<View>(R.id.menuFiles).setOnClickListener { hideStart(); openInternal("files", "Dosya Gezgini") }
-        findViewById<View>(R.id.menuThisPc).setOnClickListener { hideStart(); openInternal("thispc", "Bu Bilgisayar") }
-        findViewById<View>(R.id.menuTrash).setOnClickListener { hideStart(); openInternal("trash", "Çöp Kutusu") }
-        findViewById<View>(R.id.menuCalendar).setOnClickListener { hideStart(); openInternal("calendar", "Takvim / Saat") }
-        findViewById<View>(R.id.menuStore)?.setOnClickListener { hideStart(); openPlayStore() }
-        findViewById<View>(R.id.menuLogout).setOnClickListener {
-            hideStart()
-            startActivity(Intent(this, SetupActivity::class.java))
-            finish()
-        }
+        // Dim background closes start
+        findViewById<View>(R.id.startMenu)?.setOnClickListener { hideStart() }
+        setupStartMenu()
         clockView.setOnClickListener { openInternal("calendar", "Takvim / Saat") }
 
         setupRubberBand()
@@ -893,6 +883,21 @@ class MainActivity : AppCompatActivity() {
             "deselector" -> content.addView(
                 LayoutInflater.from(this).inflate(R.layout.panel_de_selector, content, false).also { fillDeSelector(it) }
             )
+            "notepad" -> content.addView(
+                LayoutInflater.from(this).inflate(R.layout.panel_notepad, content, false).also { fillNotepad(it) }
+            )
+            "paint" -> content.addView(
+                LayoutInflater.from(this).inflate(R.layout.panel_paint, content, false).also { fillPaint(it) }
+            )
+            "weather" -> content.addView(
+                LayoutInflater.from(this).inflate(R.layout.panel_weather, content, false).also { fillWeather(it) }
+            )
+            "music" -> content.addView(
+                LayoutInflater.from(this).inflate(R.layout.panel_music, content, false).also { fillMusic(it) }
+            )
+            "disk" -> content.addView(
+                LayoutInflater.from(this).inflate(R.layout.panel_disk, content, false).also { fillDisk(it) }
+            )
         }
 
         val w = (resources.displayMetrics.widthPixels * 0.92f).toInt()
@@ -1610,6 +1615,311 @@ class MainActivity : AppCompatActivity() {
                 textSize = 11f
             })
             list.addView(row)
+        }
+    }
+
+
+    private fun toggleStartMenu() {
+        if (startMenu.isVisible) hideStart() else {
+            populateStartMenu()
+            startMenu.isVisible = true
+        }
+    }
+
+    private fun setupStartMenu() {
+        findViewById<View>(R.id.btnPowerOff)?.setOnClickListener {
+            hideStart()
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Kapat")
+                .setMessage("AstraSage OS kapatılsın mı?")
+                .setPositiveButton("Kapat") { _, _ -> finishAffinity() }
+                .setNegativeButton("İptal", null)
+                .show()
+        }
+        findViewById<View>(R.id.btnPowerRestart)?.setOnClickListener {
+            hideStart()
+            Toast.makeText(this, "Yeniden başlatılıyor…", Toast.LENGTH_SHORT).show()
+            val i = Intent(this, SetupActivity::class.java)
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(i)
+            finish()
+        }
+        findViewById<View>(R.id.btnPowerSleep)?.setOnClickListener {
+            hideStart()
+            // Sleep = black overlay until tap
+            val sleep = View(this).apply {
+                setBackgroundColor(0xFF000000.toInt())
+                isClickable = true
+                setOnClickListener { windowsHost.removeView(this) }
+            }
+            windowsHost.addView(sleep, FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            ))
+            Toast.makeText(this, "Uyku modu — dokunarak uyan", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun populateStartMenu() {
+        findViewById<View>(R.id.startMenuPanel)?.setOnClickListener { /* consume */ }
+        findViewById<TextView>(R.id.startUserLabel)?.text = Prefs.getUser(this).ifBlank { "Kullanıcı" }
+        val grid = findViewById<android.widget.GridLayout>(R.id.startPinnedGrid) ?: return
+        grid.removeAllViews()
+        data class Tile(val label: String, val icon: Int, val action: () -> Unit)
+        val tiles = listOf(
+            Tile("Not Defteri", R.drawable.ic_docs) { hideStart(); openInternal("notepad", "Not Defteri") },
+            Tile("Paint", R.drawable.ic_options) { hideStart(); openInternal("paint", "Paint") },
+            Tile("Hava", R.drawable.ic_network) { hideStart(); openInternal("weather", "Hava Durumu") },
+            Tile("Müzik", R.drawable.ic_folder) { hideStart(); openInternal("music", "Müzik") },
+            Tile("Chrome", R.drawable.ic_network) { hideStart(); openChrome() },
+            Tile("AST", R.drawable.ast_icon) { hideStart(); openInternal("ast", "AST Terminal") },
+            Tile("Disk", R.drawable.ic_thispc) { hideStart(); openInternal("disk", "Disk") },
+            Tile("Dosyalar", R.drawable.ic_folder) { hideStart(); openInternal("files", "Dosya Gezgini") }
+        )
+        tiles.forEach { tile ->
+            val v = LayoutInflater.from(this).inflate(R.layout.item_start_tile, grid, false)
+            v.findViewById<android.widget.ImageView>(R.id.tileIcon).setImageResource(tile.icon)
+            v.findViewById<TextView>(R.id.tileLabel).text = tile.label
+            v.setOnClickListener { tile.action() }
+            grid.addView(v)
+        }
+        val rec = findViewById<LinearLayout>(R.id.startRecommended) ?: return
+        rec.removeAllViews()
+        listOf(
+            "Bu Bilgisayar" to { hideStart(); openInternal("thispc", "Bu Bilgisayar") },
+            "Seçenekler" to { hideStart(); openOptionsPanel() },
+            "Desktop Ortamı" to { hideStart(); openDeSelector() },
+            "Oturumu kapat" to {
+                hideStart()
+                startActivity(Intent(this, SetupActivity::class.java))
+                finish()
+            }
+        ).forEach { (label, act) ->
+            rec.addView(TextView(this).apply {
+                text = label
+                setTextColor(0xFFEEEEEE.toInt())
+                textSize = 13f
+                setPadding(12, 14, 12, 14)
+                setOnClickListener { act() }
+            })
+        }
+    }
+
+    private fun openChrome() {
+        val browsers = listOf("com.android.chrome", "com.chrome.beta", "com.sec.android.app.sbrowser")
+        for (pkg in browsers) {
+            val launch = packageManager.getLaunchIntentForPackage(pkg)
+            if (launch != null) {
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(launch)
+                return
+            }
+        }
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.google.com")))
+        } catch (_: Exception) {
+            Toast.makeText(this, "Tarayıcı yok", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private fun fillNotepad(root: View) {
+        val editor = root.findViewById<android.widget.EditText>(R.id.noteEditor)
+        val status = root.findViewById<TextView>(R.id.noteStatus)
+        val file = File(RealFs.home(), "not.txt")
+        if (file.exists()) {
+            try { editor.setText(file.readText()) } catch (_: Exception) {}
+        }
+        root.findViewById<View>(R.id.noteNew).setOnClickListener {
+            editor.setText(""); status.text = "Yeni not"
+        }
+        root.findViewById<View>(R.id.noteSave).setOnClickListener {
+            try {
+                file.writeText(editor.text?.toString().orEmpty())
+                status.text = "Kaydedildi: ${file.name}"
+                Toast.makeText(this, "Kaydedildi", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                status.text = "Hata: ${e.message}"
+            }
+        }
+    }
+
+    private fun fillPaint(root: View) {
+        val canvas = root.findViewById<PaintCanvasView>(R.id.paintCanvas)
+        val colors = root.findViewById<LinearLayout>(R.id.paintColors)
+        val palette = listOf(
+            0xFF000000.toInt(), 0xFFFFFFFF.toInt(), 0xFFFF0000.toInt(), 0xFF00AA00.toInt(),
+            0xFF0066FF.toInt(), 0xFFFFFF00.toInt(), 0xFFFF00FF.toInt(), 0xFF00FFFF.toInt(),
+            0xFFB8FF1A.toInt(), 0xFFFF9800.toInt(), 0xFF9C27B0.toInt(), 0xFF795548.toInt()
+        )
+        colors.removeAllViews()
+        palette.forEach { c ->
+            colors.addView(View(this).apply {
+                val d = (28 * resources.displayMetrics.density).toInt()
+                layoutParams = LinearLayout.LayoutParams(d, d).also { it.marginEnd = 6 }
+                setBackgroundColor(c)
+                setOnClickListener { canvas.color = c }
+            })
+        }
+        fun sel(id: Int, tool: PaintCanvasView.Tool) {
+            root.findViewById<View>(id).setOnClickListener { canvas.tool = tool }
+        }
+        sel(R.id.paintBrush, PaintCanvasView.Tool.BRUSH)
+        sel(R.id.paintEraser, PaintCanvasView.Tool.ERASER)
+        sel(R.id.paintLine, PaintCanvasView.Tool.LINE)
+        sel(R.id.paintRect, PaintCanvasView.Tool.RECT)
+        sel(R.id.paintCircle, PaintCanvasView.Tool.CIRCLE)
+        sel(R.id.paintFill, PaintCanvasView.Tool.FILL)
+        root.findViewById<View>(R.id.paintClear).setOnClickListener { canvas.clearCanvas() }
+        root.findViewById<View>(R.id.paintUndo).setOnClickListener { canvas.undo() }
+        root.findViewById<android.widget.SeekBar>(R.id.paintSize).setOnSeekBarChangeListener(
+            object : android.widget.SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(s: android.widget.SeekBar?, p: Int, f: Boolean) {
+                    canvas.strokeWidth = (p + 2).toFloat()
+                }
+                override fun onStartTrackingTouch(s: android.widget.SeekBar?) {}
+                override fun onStopTrackingTouch(s: android.widget.SeekBar?) {}
+            }
+        )
+    }
+
+    private fun fillWeather(root: View) {
+        val city = root.findViewById<TextView>(R.id.weatherCity)
+        val temp = root.findViewById<TextView>(R.id.weatherTemp)
+        val desc = root.findViewById<TextView>(R.id.weatherDesc)
+        val extra = root.findViewById<TextView>(R.id.weatherExtra)
+        fun load() {
+            city.text = "Yerel (cihaz)"
+            desc.text = "Örnek veri — ağ API opsiyonel"
+            // Lightweight open-meteo style without key would need network; show device-based mock + tip
+            val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            val t = when (hour) {
+                in 6..11 -> 18
+                in 12..17 -> 24
+                in 18..21 -> 20
+                else -> 14
+            }
+            temp.text = "${t}°"
+            extra.text = "Durum: Açık / Parçalı\nNem: %55\nRüzgar: 12 km/s\n\nİpucu: Gerçek konum için cihaz konum izni + Open-Meteo eklenebilir."
+        }
+        load()
+        root.findViewById<View>(R.id.weatherRefresh).setOnClickListener { load() }
+    }
+
+    private var musicPlayer: android.media.MediaPlayer? = null
+    private var musicTracks: List<File> = emptyList()
+    private var musicIndex = 0
+
+    private fun fillMusic(root: View) {
+        val list = root.findViewById<RecyclerView>(R.id.musicList)
+        val now = root.findViewById<TextView>(R.id.musicNow)
+        list.layoutManager = LinearLayoutManager(this)
+        musicTracks = scanMusic()
+        fun playAt(i: Int) {
+            if (musicTracks.isEmpty()) {
+                now.text = "Müzik bulunamadı (Music/Download)"
+                return
+            }
+            musicIndex = i.coerceIn(0, musicTracks.lastIndex)
+            val f = musicTracks[musicIndex]
+            try {
+                musicPlayer?.release()
+                musicPlayer = android.media.MediaPlayer().apply {
+                    setDataSource(f.absolutePath)
+                    prepare()
+                    start()
+                }
+                now.text = "▶ ${f.name}"
+            } catch (e: Exception) {
+                now.text = "Hata: ${e.message}"
+            }
+        }
+        list.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+            override fun getItemCount() = musicTracks.size
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                val tv = TextView(parent.context).apply {
+                    setPadding(16, 18, 16, 18)
+                    setTextColor(0xFFEEEEEE.toInt())
+                    textSize = 13f
+                    setBackgroundResource(R.drawable.bg_choice)
+                    val lp = RecyclerView.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                    (lp as ViewGroup.MarginLayoutParams).bottomMargin = 6
+                    layoutParams = lp
+                }
+                return object : RecyclerView.ViewHolder(tv) {}
+            }
+            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                val tv = holder.itemView as TextView
+                tv.text = "🎵 ${musicTracks[position].name}"
+                tv.setOnClickListener { playAt(position) }
+            }
+        }
+        root.findViewById<View>(R.id.musicPlay).setOnClickListener {
+            val mp = musicPlayer
+            if (mp == null) playAt(musicIndex)
+            else if (mp.isPlaying) {
+                mp.pause(); now.text = "⏸ ${musicTracks.getOrNull(musicIndex)?.name}"
+            } else {
+                mp.start(); now.text = "▶ ${musicTracks.getOrNull(musicIndex)?.name}"
+            }
+        }
+        root.findViewById<View>(R.id.musicNext).setOnClickListener {
+            if (musicTracks.isNotEmpty()) playAt((musicIndex + 1) % musicTracks.size)
+        }
+        root.findViewById<View>(R.id.musicPrev).setOnClickListener {
+            if (musicTracks.isNotEmpty()) playAt((musicIndex - 1 + musicTracks.size) % musicTracks.size)
+        }
+        if (musicTracks.isEmpty()) now.text = "Müzik yok — Music veya Download klasörüne bakın"
+    }
+
+    private fun scanMusic(): List<File> {
+        val out = mutableListOf<File>()
+        val roots = listOf(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            File(Environment.getExternalStorageDirectory(), "Music"),
+            File(Environment.getExternalStorageDirectory(), "Download")
+        )
+        val exts = setOf("mp3", "m4a", "wav", "ogg", "flac", "aac")
+        fun walk(dir: File, depth: Int) {
+            if (depth > 3 || !dir.isDirectory) return
+            dir.listFiles()?.forEach { f ->
+                if (f.isDirectory) walk(f, depth + 1)
+                else if (f.extension.lowercase() in exts) out.add(f)
+            }
+        }
+        roots.forEach { if (it != null && it.exists()) walk(it, 0) }
+        return out.distinctBy { it.absolutePath }.sortedBy { it.name.lowercase() }.take(200)
+    }
+
+    private fun fillDisk(root: View) {
+        val info = root.findViewById<TextView>(R.id.diskInfo)
+        val bar = root.findViewById<android.widget.ProgressBar>(R.id.diskBar)
+        try {
+            val path = Environment.getExternalStorageDirectory().absolutePath
+            val st = android.os.StatFs(path)
+            val total = st.totalBytes
+            val free = st.availableBytes
+            val used = total - free
+            val pct = if (total > 0) ((used * 100) / total).toInt() else 0
+            info.text = """
+                |Birim     : ${path}
+                |Dosya sis.: FUSE / media
+                |Kapasite  : ${RealFs.formatSize(total)}
+                |Kullanılan: ${RealFs.formatSize(used)}  (%${pct})
+                |Boş       : ${RealFs.formatSize(free)}
+                |
+                |Dahili depolama (gerçek cihaz istatistiği)
+            """.trimMargin()
+            bar.progress = pct
+        } catch (e: Exception) {
+            info.text = "Disk bilgisi okunamadı: ${e.message}"
+        }
+        root.findViewById<View>(R.id.diskOpenFiles).setOnClickListener {
+            startActivity(Intent(this, FilesActivity::class.java))
         }
     }
 

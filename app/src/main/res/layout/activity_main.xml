@@ -129,51 +129,24 @@
             android:text="12:00\n1 Oca" />
     </LinearLayout>
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/startMenu"
-        android:layout_width="260dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="56dp"
-        android:orientation="vertical"
-        android:background="@drawable/bg_start_menu"
-        android:padding="12dp"
-        android:elevation="24dp"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="52dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="#66000000"
+        android:elevation="30dp">
+        <include
+            layout="@layout/panel_start_menu"
+            android:layout_width="340dp"
             android:layout_height="wrap_content"
-            android:text="Başlat"
-            android:textColor="@color/accent"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:paddingBottom="8dp" />
+            android:layout_gravity="bottom|start"
+            android:layout_marginStart="12dp"
+            android:layout_marginBottom="12dp" />
+    </FrameLayout>
 
-        <TextView android:id="@+id/menuAst" android:layout_width="match_parent" android:layout_height="40dp"
-            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  AST Terminal"
-            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuFiles" android:layout_width="match_parent" android:layout_height="40dp"
-            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Dosya Gezgini"
-            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuThisPc" android:layout_width="match_parent" android:layout_height="40dp"
-            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Bu Bilgisayar"
-            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuStore" android:layout_width="match_parent" android:layout_height="40dp"
-            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  AstraStore"
-            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuTrash" android:layout_width="match_parent" android:layout_height="40dp"
-            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Çöp Kutusu"
-            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuCalendar" android:layout_width="match_parent" android:layout_height="40dp"
-            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Takvim / Saat"
-            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="6dp" android:background="#22FFFFFF" />
-        <TextView android:id="@+id/menuLogout" android:layout_width="match_parent" android:layout_height="40dp"
-            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Oturumu kapat"
-            android:textColor="@color/danger" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-    </LinearLayout>
-
-    <include layout="@layout/splash_overlay" />
+<include layout="@layout/splash_overlay" />
 </FrameLayout>

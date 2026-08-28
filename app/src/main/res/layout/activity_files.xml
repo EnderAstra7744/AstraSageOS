@@ -3,73 +3,86 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_deep">
+    android:background="#FF1A1A1A">
 
+    <!-- Title bar -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="40dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:background="#16161E">
-
-        <TextView
-            android:id="@+id/btnUp"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:gravity="center"
-            android:text="⬆"
-            android:textSize="16sp"
-            android:textColor="@color/text"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-
-        <TextView
-            android:id="@+id/btnHome"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:gravity="center"
-            android:text="🏠"
-            android:textSize="14sp"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-
-        <TextView
-            android:id="@+id/pathText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="6dp"
-            android:ellipsize="start"
-            android:singleLine="true"
-            android:textColor="#7DD3FC"
-            android:textSize="12sp"
-            android:fontFamily="monospace" />
-
-        <TextView
-            android:id="@+id/btnClose"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:gravity="center"
-            android:text="✕"
-            android:textColor="@color/text_dim"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+        android:background="#FF202020"
+        android:paddingHorizontal="10dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:text="Dosya Gezgini" android:textColor="#B8FF1A" android:textStyle="bold" android:textSize="13sp" />
+        <TextView android:id="@+id/btnClose" android:layout_width="36dp" android:layout_height="36dp"
+            android:gravity="center" android:text="✕" android:textColor="#FF8A80" android:textSize="14sp" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/permHint"
+    <!-- Toolbar -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="12dp"
-        android:textColor="@color/accent"
-        android:textSize="12sp"
-        android:visibility="gone"
-        android:background="#22A8FF00" />
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#FF252525"
+        android:paddingHorizontal="6dp">
+        <TextView android:id="@+id/btnUp" android:layout_width="wrap_content" android:layout_height="match_parent"
+            android:gravity="center" android:paddingHorizontal="12dp" android:text="⬆ Yukarı" android:textColor="#EEEEEE" android:textSize="12sp" />
+        <TextView android:id="@+id/btnHome" android:layout_width="wrap_content" android:layout_height="match_parent"
+            android:gravity="center" android:paddingHorizontal="12dp" android:text="🏠" android:textColor="#B8FF1A" android:textSize="14sp" />
+        <TextView android:id="@+id/btnRefresh" android:layout_width="wrap_content" android:layout_height="match_parent"
+            android:gravity="center" android:paddingHorizontal="12dp" android:text="↻" android:textColor="#EEEEEE" android:textSize="14sp" />
+        <TextView android:id="@+id/btnPin" android:layout_width="wrap_content" android:layout_height="match_parent"
+            android:gravity="center" android:paddingHorizontal="12dp" android:text="📌 Masaüstü" android:textColor="#B8FF1A" android:textSize="12sp" />
+    </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fileList"
+    <!-- Address bar -->
+    <TextView
+        android:id="@+id/pathView"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:background="#FF2A2A2A"
+        android:textColor="#CCFFFFFF"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:maxLines="1"
+        android:ellipsize="start" />
+
+    <!-- Sidebar + list -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="8dp"
-        android:clipToPadding="false" />
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="140dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#FF181818"
+            android:padding="8dp">
+            <TextView android:id="@+id/navQuick" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Hızlı erişim" android:textColor="#88FFFFFF" android:textSize="11sp" android:paddingBottom="6dp" />
+            <TextView android:id="@+id/navHome" android:layout_width="match_parent" android:layout_height="40dp"
+                android:gravity="center_vertical" android:paddingStart="8dp" android:text="📁 Belgeler" android:textColor="#EEEEEE" android:textSize="13sp" />
+            <TextView android:id="@+id/navDownloads" android:layout_width="match_parent" android:layout_height="40dp"
+                android:gravity="center_vertical" android:paddingStart="8dp" android:text="⬇️ İndirilenler" android:textColor="#EEEEEE" android:textSize="13sp" />
+            <TextView android:id="@+id/navRoot" android:layout_width="match_parent" android:layout_height="40dp"
+                android:gravity="center_vertical" android:paddingStart="8dp" android:text="💾 Bu Bilgisayar" android:textColor="#EEEEEE" android:textSize="13sp" />
+            <TextView android:id="@+id/navMusic" android:layout_width="match_parent" android:layout_height="40dp"
+                android:gravity="center_vertical" android:paddingStart="8dp" android:text="🎵 Müzik" android:textColor="#EEEEEE" android:textSize="13sp" />
+            <TextView android:id="@+id/navPictures" android:layout_width="match_parent" android:layout_height="40dp"
+                android:gravity="center_vertical" android:paddingStart="8dp" android:text="🖼 Resimler" android:textColor="#EEEEEE" android:textSize="13sp" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fileList"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="4dp" />
+    </LinearLayout>
 </LinearLayout>

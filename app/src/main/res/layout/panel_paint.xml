@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FF1A1A1A">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#FF252525">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="8dp">
+            <TextView android:id="@+id/paintBrush" android:layout_width="wrap_content" android:layout_height="36dp"
+                android:gravity="center" android:paddingHorizontal="10dp" android:text="✏️ Fırça" android:textColor="#B8FF1A" android:textSize="12sp" />
+            <TextView android:id="@+id/paintEraser" android:layout_width="wrap_content" android:layout_height="36dp"
+                android:gravity="center" android:paddingHorizontal="10dp" android:text="🧹 Silgi" android:textColor="#EEEEEE" android:textSize="12sp" />
+            <TextView android:id="@+id/paintLine" android:layout_width="wrap_content" android:layout_height="36dp"
+                android:gravity="center" android:paddingHorizontal="10dp" android:text="／ Çizgi" android:textColor="#EEEEEE" android:textSize="12sp" />
+            <TextView android:id="@+id/paintRect" android:layout_width="wrap_content" android:layout_height="36dp"
+                android:gravity="center" android:paddingHorizontal="10dp" android:text="▭ Kutu" android:textColor="#EEEEEE" android:textSize="12sp" />
+            <TextView android:id="@+id/paintCircle" android:layout_width="wrap_content" android:layout_height="36dp"
+                android:gravity="center" android:paddingHorizontal="10dp" android:text="○ Daire" android:textColor="#EEEEEE" android:textSize="12sp" />
+            <TextView android:id="@+id/paintFill" android:layout_width="wrap_content" android:layout_height="36dp"
+                android:gravity="center" android:paddingHorizontal="10dp" android:text="🪣 Dolgu" android:textColor="#EEEEEE" android:textSize="12sp" />
+            <TextView android:id="@+id/paintClear" android:layout_width="wrap_content" android:layout_height="36dp"
+                android:gravity="center" android:paddingHorizontal="10dp" android:text="Yeni" android:textColor="#FF8A80" android:textSize="12sp" />
+            <TextView android:id="@+id/paintUndo" android:layout_width="wrap_content" android:layout_height="36dp"
+                android:gravity="center" android:paddingHorizontal="10dp" android:text="↩ Geri" android:textColor="#EEEEEE" android:textSize="12sp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:id="@+id/paintColors"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="8dp"
+        android:background="#FF1F1F1F" />
+
+    <SeekBar
+        android:id="@+id/paintSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="40"
+        android:progress="8"
+        android:paddingHorizontal="12dp" />
+
+    <com.astrasage.os.PaintCanvasView
+        android:id="@+id/paintCanvas"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFFFFFFF" />
+</LinearLayout>

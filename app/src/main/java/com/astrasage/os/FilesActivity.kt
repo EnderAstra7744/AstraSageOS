@@ -23,7 +23,6 @@ import java.io.File
 class FilesActivity : AppCompatActivity() {
 
     private lateinit var pathText: TextView
-    private lateinit var permHint: TextView
     private lateinit var list: RecyclerView
     private var cwd: File = RealFs.root()
 
@@ -31,8 +30,7 @@ class FilesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_files)
 
-        pathText = findViewById(R.id.pathText)
-        permHint = findViewById(R.id.permHint)
+        pathText = findViewById(R.id.pathView)
         list = findViewById(R.id.fileList)
         list.layoutManager = LinearLayoutManager(this)
 
@@ -45,7 +43,31 @@ class FilesActivity : AppCompatActivity() {
             }
         }
         findViewById<View>(R.id.btnHome).setOnClickListener {
-            cwd = RealFs.root()
+            cwd = RealFs.home()
+            refresh()
+        }
+        findViewById<View>(R.id.btnRefresh)?.setOnClickListener { refresh() }
+        findViewById<View>(R.id.btnPin)?.setOnClickListener {
+            Prefs.addDesktopPin(this, cwd.absolutePath)
+            Toast.makeText(this, "Masaüstüne eklendi", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<View>(R.id.navHome)?.setOnClickListener {
+            cwd = RealFs.home(); refresh()
+        }
+        findViewById<View>(R.id.navDownloads)?.setOnClickListener {
+            cwd = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            refresh()
+        }
+        findViewById<View>(R.id.navRoot)?.setOnClickListener {
+            cwd = RealFs.root(); refresh()
+        }
+        findViewById<View>(R.id.navMusic)?.setOnClickListener {
+            cwd = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
+            refresh()
+        }
+        findViewById<View>(R.id.navPictures)?.setOnClickListener {
+            cwd = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
             refresh()
         }
 
@@ -61,19 +83,13 @@ class FilesActivity : AppCompatActivity() {
     private fun requestStorageAccess() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {
-                permHint.visibility = View.VISIBLE
-                permHint.text = "Dosyalara erişim için dokun → İzin ver (Tüm dosyalar)"
-                permHint.setOnClickListener {
-                    try {
-                        val i = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                        i.data = Uri.parse("package:$packageName")
-                        startActivity(i)
-                    } catch (_: Exception) {
-                        startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
-                    }
+                try {
+                    val i = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                    i.data = Uri.parse("package:$packageName")
+                    startActivity(i)
+                } catch (_: Exception) {
+                    startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
                 }
-            } else {
-                permHint.visibility = View.GONE
             }
         } else {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -82,7 +98,7 @@ class FilesActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    100
+                    42
                 )
             }
         }
@@ -95,61 +111,32 @@ class FilesActivity : AppCompatActivity() {
         } catch (_: Exception) {
             emptyList()
         }
-        list.adapter = FileAdapter(files,
-            onOpen = { f ->
-                if (f.isDirectory) {
-                    cwd = f
-                    refresh()
-                } else {
-                    openFile(f)
-                }
-            },
-            onPin = { f ->
-                Prefs.addDesktopPin(this, f.absolutePath)
-                Toast.makeText(this, "Masaüstüne eklendi: ${f.name}", Toast.LENGTH_SHORT).show()
+        list.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+            override fun getItemCount() = files.size
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                val v = LayoutInflater.from(parent.context).inflate(R.layout.item_file, parent, false)
+                return object : RecyclerView.ViewHolder(v) {}
             }
-        )
-    }
-
-    private fun openFile(f: File) {
-        try {
-            val uri = androidx.core.content.FileProvider.getUriForFile(
-                this, "$packageName.provider", f
-            )
-            val mime = contentResolver.getType(uri) ?: "*/*"
-            val i = Intent(Intent.ACTION_VIEW).setDataAndType(uri, mime).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            startActivity(Intent.createChooser(i, f.name))
-        } catch (_: Exception) {
-            Toast.makeText(this, "Açılamadı: ${f.name}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    class FileAdapter(
-        private val items: List<File>,
-        private val onOpen: (File) -> Unit,
-        private val onPin: (File) -> Unit
-    ) : RecyclerView.Adapter<FileAdapter.H>() {
-        class H(v: View) : RecyclerView.ViewHolder(v) {
-            val icon: TextView = v.findViewById(R.id.fileIcon)
-            val name: TextView = v.findViewById(R.id.fileName)
-            val meta: TextView = v.findViewById(R.id.fileMeta)
-            val pin: TextView = v.findViewById(R.id.btnPin)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): H {
-            val v = LayoutInflater.from(parent.context).inflate(R.layout.item_file, parent, false)
-            return H(v)
-        }
-
-        override fun getItemCount() = items.size
-
-        override fun onBindViewHolder(h: H, position: Int) {
-            val f = items[position]
-            h.icon.text = if (f.isDirectory) "📁" else "📄"
-            h.name.text = f.name
-            h.meta.text = if (f.isDirectory) "Klasör" else RealFs.formatSize(f.length())
-            h.itemView.setOnClickListener { onOpen(f) }
-            h.pin.setOnClickListener { onPin(f) }
+            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                val f = files[position]
+                val name = holder.itemView.findViewById<TextView>(R.id.fileName)
+                val meta = holder.itemView.findViewById<TextView>(R.id.fileMeta)
+                name?.text = if (f.isDirectory) "📁 ${f.name}" else "📄 ${f.name}"
+                meta?.text = if (f.isDirectory) "Klasör" else RealFs.formatSize(f.length())
+                holder.itemView.setOnClickListener {
+                    if (f.isDirectory) {
+                        cwd = f
+                        refresh()
+                    } else {
+                        Toast.makeText(this@FilesActivity, f.absolutePath, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                holder.itemView.setOnLongClickListener {
+                    Prefs.addDesktopPin(this@FilesActivity, f.absolutePath)
+                    Toast.makeText(this@FilesActivity, "Masaüstüne eklendi", Toast.LENGTH_SHORT).show()
+                    true
+                }
+            }
         }
     }
 }
