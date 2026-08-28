@@ -106,6 +106,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.menuThisPc).setOnClickListener { hideStart(); openInternal("thispc", "Bu Bilgisayar") }
         findViewById<View>(R.id.menuTrash).setOnClickListener { hideStart(); openInternal("trash", "Çöp Kutusu") }
         findViewById<View>(R.id.menuCalendar).setOnClickListener { hideStart(); openInternal("calendar", "Takvim / Saat") }
+        findViewById<View>(R.id.menuStore)?.setOnClickListener { hideStart(); openPlayStore() }
         findViewById<View>(R.id.menuLogout).setOnClickListener {
             hideStart()
             startActivity(Intent(this, SetupActivity::class.java))
@@ -124,6 +125,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         clockHandler.post(clockTick)
+
+        // Boot splash
+        val splash = findViewById<View>(R.id.splashRoot)
+        splash?.isVisible = true
+        splash?.postDelayed({
+            splash.animate().alpha(0f).setDuration(400).withEndAction {
+                splash.isVisible = false
+                splash.alpha = 1f
+            }.start()
+        }, 1200)
     }
 
     override fun onDestroy() {
@@ -292,23 +303,60 @@ class MainActivity : AppCompatActivity() {
         sys("sys:thispc", "Bu Bilgisayar", "💻") { openInternal("thispc", "Bu Bilgisayar") }
         sys("sys:trash", "Çöp Kutusu", "🗑️") { openInternal("trash", "Çöp Kutusu") }
         sys("sys:files", "Dosyalar", "📁") { openInternal("files", "Dosya Gezgini") }
-        sys("sys:ast", "AST", ">_") { openInternal("ast", "AST Terminal") }
+        if (!recycle.contains("sys:ast")) {
+            val astView = LayoutInflater.from(this).inflate(R.layout.item_desktop_icon, desktop, false)
+            astView.findViewById<ImageView>(R.id.appIcon).setImageResource(R.drawable.ast_icon)
+            astView.findViewById<TextView>(R.id.appLabel).text = "AST"
+            placeIcon(astView, "sys:ast", index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
+            bindIconTouch(astView, "sys:ast", onOpen = { openInternal("ast", "AST Terminal") }, onDelete = {
+                Prefs.moveToRecycle(this, "sys:ast"); layoutDesktop()
+            })
+            index++
+        }
         sys("sys:calendar", "Takvim", "📅") { openInternal("calendar", "Takvim / Saat") }
 
-        // Apps (not hidden)
-        allApps.forEach { app ->
+        // Only essential apps (browser, store, files, settings, phone, messages, camera…)
+        val essential = essentialApps(allApps)
+        essential.forEach { app ->
             val pa = "${app.packageName}/${app.activityName}"
             if (hidden.contains(pa)) return@forEach
             val key = "app:$pa"
             if (recycle.contains(key)) return@forEach
-            if (index >= 28) return@forEach
             val view = inflateAppIcon(app)
             placeIcon(view, key, index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
-            bindIconTouch(view, key, onOpen = { openApp(app) }, onDelete = {
+            bindIconTouch(view, key, onOpen = {
+                if (isStorePackage(app.packageName)) openPlayStore()
+                else openApp(app)
+            }, onDelete = {
                 Prefs.hideApp(this, pa)
                 layoutDesktop()
                 Toast.makeText(this, "Masaüstünden kaldırıldı (uygulama silinmedi)", Toast.LENGTH_SHORT).show()
             })
+            index++
+        }
+        // AstraStore shortcut (opens real Play Store / market)
+        if (!recycle.contains("sys:store")) {
+            val view = inflateEmojiIcon("AstraStore", "🛒")
+            // Prefer image: use AS style - keep emoji for store
+            placeIcon(view, "sys:store", index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
+            bindIconTouch(view, "sys:store", onOpen = { openPlayStore() }, onDelete = {
+                Prefs.moveToRecycle(this, "sys:store")
+                layoutDesktop()
+            })
+            index++
+        }
+
+        // User-pinned apps from drawer
+        val pinned = Prefs.getPinnedApps(this)
+        pinned.forEach { pa ->
+            if (hidden.contains(pa)) return@forEach
+            val key = "app:$pa"
+            if (recycle.contains(key)) return@forEach
+            // skip if already shown as essential
+            val app = allApps.find { "${it.packageName}/${it.activityName}" == pa } ?: return@forEach
+            val view = inflateAppIcon(app)
+            placeIcon(view, key, index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
+            bindIconTouch(view, key, onOpen = { openApp(app) }, onDelete = null)
             index++
         }
 
@@ -399,6 +447,8 @@ class MainActivity : AppCompatActivity() {
                         v.animate().scaleX(1.1f).scaleY(1.1f).setDuration(80).start()
                         v.elevation = 28f
                         vibrate()
+                        // Highlight trash when dragging starts
+                        iconViews["sys:trash"]?.animate()?.scaleX(1.15f)?.scaleY(1.15f)?.setDuration(100)?.start()
                     }
                     v.postDelayed(runnable!!, longPressTimeout)
                     true
@@ -426,21 +476,28 @@ class MainActivity : AppCompatActivity() {
                         } else {
                             v.x = nx; v.y = ny
                         }
+                        // Visual feedback when over trash
+                        val over = key != "sys:trash" && isOverTrash(v)
+                        iconViews["sys:trash"]?.alpha = if (over) 0.55f else 1f
                     }
                     true
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     runnable?.let { v.removeCallbacks(it) }
+                    iconViews["sys:trash"]?.animate()?.scaleX(1f)?.scaleY(1f)?.alpha(1f)?.setDuration(100)?.start()
                     if (dragging) {
                         v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
                         v.elevation = 0f
+                        dragging = false
+                        // Drop on trash → remove from desktop only
+                        if (moved && key != "sys:trash" && isOverTrash(v)) {
+                            sendToTrash(key)
+                            return@setOnTouchListener true
+                        }
                         if (selectedKeys.contains(key) && selectedKeys.size > 1) {
                             selectedKeys.forEach { k -> iconViews[k]?.let { savePos(k, it.x, it.y) } }
-                        } else savePos(key, v.x, v.y)
-                        dragging = false
-                        if (!moved && onDelete != null) {
-                            // long press without move → delete to trash confirm
-                            onDelete.invoke()
+                        } else {
+                            savePos(key, v.x, v.y)
                         }
                     } else if (!moved) {
                         if (selectedKeys.isNotEmpty()) toggleSelect(key) else onOpen()
@@ -450,6 +507,28 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    private fun isOverTrash(dragged: View): Boolean {
+        val trash = iconViews["sys:trash"] ?: return false
+        val cx = dragged.x + dragged.width / 2f
+        val cy = dragged.y + dragged.height / 2f
+        return cx >= trash.x && cx <= trash.x + trash.width &&
+            cy >= trash.y && cy <= trash.y + trash.height
+    }
+
+    private fun sendToTrash(key: String) {
+        when {
+            key.startsWith("app:") -> {
+                Prefs.hideApp(this, key.removePrefix("app:"))
+                Prefs.unpinApp(this, key.removePrefix("app:"))
+            }
+            key.startsWith("file:") -> Prefs.moveToRecycle(this, key)
+            key.startsWith("sys:") -> Prefs.moveToRecycle(this, key)
+            else -> Prefs.moveToRecycle(this, key)
+        }
+        Toast.makeText(this, "Çöp kutusuna taşındı (telefonda silinmedi)", Toast.LENGTH_SHORT).show()
+        layoutDesktop()
     }
 
     private fun toggleSelect(key: String) {
@@ -588,6 +667,48 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+        // Two-finger pinch to resize (like trackpad / mouse wheel zoom on desktop)
+        var startDist = 0f
+        var startW = 0
+        var startH = 0
+        panel.setOnTouchListener { v, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_POINTER_DOWN -> {
+                    if (e.pointerCount >= 2 && !state.maximized) {
+                        val x0 = e.getX(0); val y0 = e.getY(0)
+                        val x1 = e.getX(1); val y1 = e.getY(1)
+                        startDist = kotlin.math.hypot((x1 - x0).toDouble(), (y1 - y0).toDouble()).toFloat()
+                        startW = v.width; startH = v.height
+                        bringFront(state.id)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (e.pointerCount >= 2 && startDist > 0f && !state.maximized) {
+                        val x0 = e.getX(0); val y0 = e.getY(0)
+                        val x1 = e.getX(1); val y1 = e.getY(1)
+                        val dist = kotlin.math.hypot((x1 - x0).toDouble(), (y1 - y0).toDouble()).toFloat()
+                        val scale = (dist / startDist).coerceIn(0.5f, 2.5f)
+                        val minW = (200 * resources.displayMetrics.density).toInt()
+                        val minH = (160 * resources.displayMetrics.density).toInt()
+                        val nw = (startW * scale).toInt().coerceIn(minW, windowsHost.width)
+                        val nh = (startH * scale).toInt().coerceIn(minH, windowsHost.height)
+                        v.layoutParams = FrameLayout.LayoutParams(nw, nh)
+                        v.x = v.x.coerceIn(0f, (windowsHost.width - nw).toFloat().coerceAtLeast(0f))
+                        v.y = v.y.coerceIn(0f, (windowsHost.height - nh).toFloat().coerceAtLeast(0f))
+                        v.requestLayout()
+                        state.normalW = nw; state.normalH = nh
+                        state.normalX = v.x; state.normalY = v.y
+                    }
+                    true
+                }
+                MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
+                    startDist = 0f
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun bringFront(id: String) {
@@ -642,29 +763,187 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshTaskbar() {
         taskbarApps.removeAllViews()
-        // Fixed shortcuts
-        fun addChip(label: String, onClick: () -> Unit) {
-            val t = TextView(this).apply {
-                text = label
-                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.text))
-                textSize = 11f
-                setPadding(18, 12, 18, 12)
-                setBackgroundResource(R.drawable.bg_choice)
+        fun addDockIcon(resId: Int?, label: String, onClick: () -> Unit) {
+            val wrap = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = android.view.Gravity.CENTER
+                setPadding(10, 4, 10, 4)
                 setOnClickListener { onClick() }
+                background = ContextCompat.getDrawable(this@MainActivity, R.drawable.bg_choice)
                 val lp = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                    LinearLayout.LayoutParams.MATCH_PARENT
                 )
-                lp.marginEnd = 6
+                lp.marginEnd = 4
                 layoutParams = lp
             }
-            taskbarApps.addView(t)
+            if (resId != null) {
+                wrap.addView(ImageView(this).apply {
+                    setImageResource(resId)
+                    layoutParams = LinearLayout.LayoutParams(28, 28)
+                    scaleType = ImageView.ScaleType.FIT_CENTER
+                })
+            } else {
+                wrap.addView(TextView(this).apply {
+                    text = label.take(1)
+                    setTextColor(ContextCompat.getColor(this@MainActivity, R.color.accent))
+                    textSize = 12f
+                    gravity = android.view.Gravity.CENTER
+                })
+            }
+            taskbarApps.addView(wrap)
         }
-        addChip("AST") { openInternal("ast", "AST Terminal") }
-        addChip("Dosyalar") { openInternal("files", "Dosya Gezgini") }
+        addDockIcon(R.drawable.ast_icon, "AST") { openInternal("ast", "AST Terminal") }
+        addDockIcon(null, "F") { openInternal("files", "Dosya Gezgini") }
+        addDockIcon(null, "S") { openPlayStore() }
         openWindows.values.forEach { w ->
-            addChip(if (w.minimized) "□ ${w.title}" else w.title) {
+            addDockIcon(null, w.title.take(1)) {
                 if (w.minimized) restoreWindow(w.id) else bringFront(w.id)
+            }
+        }
+        // All apps — ☰ (üç çizgi)
+        val allBtn = TextView(this).apply {
+            text = "☰"
+            setTextColor(ContextCompat.getColor(this@MainActivity, R.color.accent))
+            textSize = 20f
+            gravity = android.view.Gravity.CENTER
+            setPadding(16, 4, 16, 4)
+            setBackgroundResource(R.drawable.bg_choice)
+            setOnClickListener { openAppDrawer() }
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            lp.marginStart = 4
+            layoutParams = lp
+        }
+        taskbarApps.addView(allBtn)
+    }
+
+    private var drawerOverlay: View? = null
+
+    private fun openAppDrawer() {
+        hideStart()
+        if (drawerOverlay != null) {
+            closeAppDrawer()
+            return
+        }
+        val overlay = LayoutInflater.from(this).inflate(R.layout.panel_app_drawer, windowsHost, false)
+        val lp = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        )
+        windowsHost.addView(overlay, lp)
+        drawerOverlay = overlay
+        overlay.elevation = 50f
+
+        overlay.findViewById<View>(R.id.btnCloseDrawer).setOnClickListener { closeAppDrawer() }
+
+        val grid = overlay.findViewById<RecyclerView>(R.id.drawerGrid)
+        val span = if (resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) 8 else 5
+        grid.layoutManager = androidx.recyclerview.widget.GridLayoutManager(this, span)
+
+        val apps = allApps
+        grid.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+            override fun getItemCount() = apps.size
+            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                val v = LayoutInflater.from(parent.context).inflate(R.layout.item_drawer_app, parent, false)
+                return object : RecyclerView.ViewHolder(v) {}
+            }
+            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                val app = apps[position]
+                val v = holder.itemView
+                v.findViewById<ImageView>(R.id.drawerIcon).setImageDrawable(app.icon)
+                v.findViewById<TextView>(R.id.drawerLabel).text = app.label
+                v.setOnClickListener { openApp(app) }
+                // Long press → pin to desktop
+                v.setOnLongClickListener {
+                    val pa = "${app.packageName}/${app.activityName}"
+                    Prefs.pinApp(this@MainActivity, pa)
+                    vibrate()
+                    Toast.makeText(this@MainActivity, "${app.label} masaüstüne eklendi", Toast.LENGTH_SHORT).show()
+                    layoutDesktop()
+                    true
+                }
+                // Drag from drawer onto desktop: long-press then move to desktop edge
+                bindDrawerDrag(v, app)
+            }
+        }
+    }
+
+    private fun closeAppDrawer() {
+        drawerOverlay?.let { windowsHost.removeView(it) }
+        drawerOverlay = null
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun bindDrawerDrag(itemView: View, app: AppInfo) {
+        val touchSlop = ViewConfiguration.get(this).scaledTouchSlop
+        val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
+        var downX = 0f; var downY = 0f
+        var dragging = false; var moved = false
+        var ghost: View? = null
+        var runnable: Runnable? = null
+
+        itemView.setOnTouchListener { v, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = e.rawX; downY = e.rawY
+                    dragging = false; moved = false
+                    runnable = Runnable {
+                        dragging = true
+                        vibrate()
+                        // floating ghost icon
+                        ghost = ImageView(this).apply {
+                            setImageDrawable(app.icon)
+                            layoutParams = FrameLayout.LayoutParams(100, 100)
+                            x = e.rawX - 50
+                            y = e.rawY - 50
+                            elevation = 80f
+                            alpha = 0.85f
+                        }
+                        windowsHost.addView(ghost)
+                    }
+                    v.postDelayed(runnable!!, longPressTimeout)
+                    false // allow click/longclick too
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = e.rawX - downX; val dy = e.rawY - downY
+                    if (!dragging && (kotlin.math.abs(dx) > touchSlop || kotlin.math.abs(dy) > touchSlop)) {
+                        runnable?.let { v.removeCallbacks(it) }
+                    }
+                    if (dragging) {
+                        moved = true
+                        ghost?.x = e.rawX - 50
+                        ghost?.y = e.rawY - 50
+                    }
+                    dragging
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    runnable?.let { v.removeCallbacks(it) }
+                    if (dragging && moved) {
+                        // Drop anywhere outside drawer top area counts as pin to desktop
+                        val pa = "${app.packageName}/${app.activityName}"
+                        Prefs.pinApp(this, pa)
+                        // save position near drop
+                        val key = "app:$pa"
+                        val density = resources.displayMetrics.density
+                        val obj = loadPositions()
+                        obj.put(key, org.json.JSONObject().apply {
+                            put("x", (e.rawX - 40).toInt().coerceAtLeast(0))
+                            put("y", (e.rawY - 40).toInt().coerceAtLeast(0))
+                        })
+                        Prefs.setIconPositions(this, obj.toString())
+                        Toast.makeText(this, "${app.label} masaüstüne eklendi", Toast.LENGTH_SHORT).show()
+                        closeAppDrawer()
+                        layoutDesktop()
+                    }
+                    ghost?.let { windowsHost.removeView(it) }
+                    ghost = null
+                    dragging = false
+                    false
+                }
+                else -> false
             }
         }
     }
@@ -810,6 +1089,78 @@ class MainActivity : AppCompatActivity() {
                 else -> append("ast: $cmd?\n")
             }
             true
+        }
+    }
+
+
+    private val ESSENTIAL_PACKAGES = listOf(
+        "com.android.chrome", "com.chrome.beta", "com.sec.android.app.sbrowser",
+        "com.opera.browser", "org.mozilla.firefox", "com.microsoft.emmx",
+        "com.android.vending", // Play Store → shown as AstraStore open
+        "com.google.android.apps.nbu.files", "com.sec.android.app.myfiles",
+        "com.android.documentsui", "com.google.android.documentsui",
+        "com.android.settings",
+        "com.google.android.dialer", "com.samsung.android.dialer", "com.android.dialer",
+        "com.google.android.apps.messaging", "com.samsung.android.messaging",
+        "com.google.android.GoogleCamera", "com.sec.android.app.camera", "com.android.camera2",
+        "com.google.android.apps.photos", "com.sec.android.gallery3d",
+        "com.google.android.gm", "com.google.android.apps.maps",
+        "com.google.android.youtube", "com.android.calculator2",
+        "com.google.android.calculator", "com.sec.android.app.popupcalculator",
+        "com.google.android.deskclock", "com.sec.android.app.clockpackage",
+        "com.google.android.contacts", "com.samsung.android.contacts"
+    )
+
+    private fun isStorePackage(pkg: String) =
+        pkg == "com.android.vending" || pkg.contains("appmarket") || pkg.contains("store") && pkg.contains("huawei")
+
+    private fun essentialApps(all: List<AppInfo>): List<AppInfo> {
+        val out = mutableListOf<AppInfo>()
+        val seen = mutableSetOf<String>()
+        for (pkg in ESSENTIAL_PACKAGES) {
+            val match = all.filter { it.packageName == pkg }
+            match.forEach {
+                if (it.packageName !in seen) {
+                    // Skip raw Play Store icon — we show AstraStore instead
+                    if (it.packageName == "com.android.vending") return@forEach
+                    seen.add(it.packageName)
+                    out.add(it)
+                }
+            }
+        }
+        // fallback browsers by name
+        if (out.none { it.packageName.contains("chrome") || it.label.contains("Browser", true) }) {
+            all.firstOrNull { it.label.contains("Chrome", true) || it.label.contains("Internet", true) || it.label.contains("Browser", true) }
+                ?.let { out.add(0, it) }
+        }
+        return out.distinctBy { it.packageName }
+    }
+
+    private fun openPlayStore() {
+        hideStart()
+        // Open the device's installed store app (Play Store / Galaxy Store fallback)
+        val storePkgs = listOf(
+            "com.android.vending",
+            "com.sec.android.app.samsungapps",
+            "com.huawei.appmarket",
+            "com.xiaomi.mipicks"
+        )
+        for (pkg in storePkgs) {
+            try {
+                val launch = packageManager.getLaunchIntentForPackage(pkg)
+                if (launch != null) {
+                    launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(launch)
+                    return
+                }
+            } catch (_: Exception) {}
+        }
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store")).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            })
+        } catch (_: Exception) {
+            Toast.makeText(this, "Mağaza açılamadı", Toast.LENGTH_SHORT).show()
         }
     }
 

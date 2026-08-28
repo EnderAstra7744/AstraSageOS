@@ -79,6 +79,24 @@ object Prefs {
     fun emptyRecycle(ctx: Context) =
         prefs(ctx).edit().putStringSet("recycle_bin", emptySet()).apply()
 
+    fun getPinnedApps(ctx: Context): Set<String> =
+        prefs(ctx).getStringSet("pinned_apps", emptySet()) ?: emptySet()
+
+    fun pinApp(ctx: Context, packageActivity: String) {
+        val s = getPinnedApps(ctx).toMutableSet()
+        s.add(packageActivity)
+        // also remove from recycle if present
+        val rec = getRecycle(ctx).toMutableSet()
+        rec.remove("app:$packageActivity")
+        prefs(ctx).edit().putStringSet("pinned_apps", s).putStringSet("recycle_bin", rec).apply()
+    }
+
+    fun unpinApp(ctx: Context, packageActivity: String) {
+        val s = getPinnedApps(ctx).toMutableSet()
+        s.remove(packageActivity)
+        prefs(ctx).edit().putStringSet("pinned_apps", s).apply()
+    }
+
     fun getHiddenApps(ctx: Context): Set<String> =
         prefs(ctx).getStringSet("hidden_apps", emptySet()) ?: emptySet()
 

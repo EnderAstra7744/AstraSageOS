@@ -22,7 +22,7 @@
         android:id="@+id/desktop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="48dp"
         android:clipChildren="false"
         android:clipToPadding="false" />
 
@@ -30,18 +30,16 @@
         android:id="@+id/selectionOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="48dp"
         android:visibility="invisible" />
 
-    <!-- Floating windows host -->
     <FrameLayout
         android:id="@+id/windowsHost"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="48dp"
         android:clipChildren="false" />
 
-    <!-- Welcome overlay -->
     <FrameLayout
         android:id="@+id/welcomeOverlay"
         android:layout_width="match_parent"
@@ -52,40 +50,42 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="16dp"
+            android:layout_margin="12dp"
             android:orientation="vertical"
             android:background="@drawable/bg_panel_window">
             <include layout="@layout/panel_welcome" />
         </LinearLayout>
     </FrameLayout>
 
-    <!-- Taskbar -->
+    <!-- Linux-style dock / panel -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:layout_gravity="bottom"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:background="@drawable/bg_taskbar"
-        android:paddingStart="4dp"
-        android:paddingEnd="6dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="8dp"
         android:elevation="20dp">
 
-        <LinearLayout
+        <ImageView
             android:id="@+id/btnStart"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:gravity="center"
-            android:background="@drawable/bg_start_btn">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="AS"
-                android:textColor="@color/accent"
-                android:textStyle="bold"
-                android:textSize="12sp" />
-        </LinearLayout>
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_as_logo"
+            android:scaleType="fitCenter"
+            android:background="@drawable/bg_start_btn"
+            android:contentDescription="Start" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="6dp"
+            android:background="#33FFFFFF" />
 
         <HorizontalScrollView
             android:layout_width="0dp"
@@ -97,31 +97,34 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="4dp" />
+                android:gravity="center_vertical" />
         </HorizontalScrollView>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="6dp"
+            android:background="#33FFFFFF" />
 
         <TextView
             android:id="@+id/clockView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingStart="8dp"
-            android:paddingEnd="4dp"
+            android:gravity="end|center_vertical"
             android:textColor="@color/text"
             android:textSize="11sp"
             android:lineSpacingExtra="1dp"
+            android:fontFamily="sans-serif-medium"
             android:text="12:00\n1 Oca" />
     </LinearLayout>
 
-    <!-- Start menu -->
     <LinearLayout
         android:id="@+id/startMenu"
-        android:layout_width="270dp"
+        android:layout_width="260dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_marginStart="8dp"
-        android:layout_marginBottom="64dp"
+        android:layout_marginBottom="56dp"
         android:orientation="vertical"
         android:background="@drawable/bg_start_menu"
         android:padding="12dp"
@@ -137,24 +140,29 @@
             android:textSize="14sp"
             android:paddingBottom="8dp" />
 
-        <TextView android:id="@+id/menuAst" android:layout_width="match_parent" android:layout_height="42dp"
+        <TextView android:id="@+id/menuAst" android:layout_width="match_parent" android:layout_height="40dp"
             android:gravity="center_vertical" android:paddingStart="8dp" android:text="  AST Terminal"
             android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuFiles" android:layout_width="match_parent" android:layout_height="42dp"
+        <TextView android:id="@+id/menuFiles" android:layout_width="match_parent" android:layout_height="40dp"
             android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Dosya Gezgini"
             android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuThisPc" android:layout_width="match_parent" android:layout_height="42dp"
+        <TextView android:id="@+id/menuThisPc" android:layout_width="match_parent" android:layout_height="40dp"
             android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Bu Bilgisayar"
             android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuTrash" android:layout_width="match_parent" android:layout_height="42dp"
+        <TextView android:id="@+id/menuStore" android:layout_width="match_parent" android:layout_height="40dp"
+            android:gravity="center_vertical" android:paddingStart="8dp" android:text="  AstraStore"
+            android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
+        <TextView android:id="@+id/menuTrash" android:layout_width="match_parent" android:layout_height="40dp"
             android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Çöp Kutusu"
             android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
-        <TextView android:id="@+id/menuCalendar" android:layout_width="match_parent" android:layout_height="42dp"
+        <TextView android:id="@+id/menuCalendar" android:layout_width="match_parent" android:layout_height="40dp"
             android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Takvim / Saat"
             android:textColor="@color/text" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
         <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="6dp" android:background="#22FFFFFF" />
-        <TextView android:id="@+id/menuLogout" android:layout_width="match_parent" android:layout_height="42dp"
+        <TextView android:id="@+id/menuLogout" android:layout_width="match_parent" android:layout_height="40dp"
             android:gravity="center_vertical" android:paddingStart="8dp" android:text="  Oturumu kapat"
             android:textColor="@color/danger" android:textSize="14sp" android:background="?attr/selectableItemBackground" />
     </LinearLayout>
+
+    <include layout="@layout/splash_overlay" />
 </FrameLayout>
