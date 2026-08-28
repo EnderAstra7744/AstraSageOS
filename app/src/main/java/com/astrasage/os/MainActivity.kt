@@ -277,14 +277,19 @@ class MainActivity : AppCompatActivity() {
         selectedKeys.clear()
 
         val density = resources.displayMetrics.density
-        val scale = Prefs.getIconScale(this).coerceIn(0.7f, 1.5f)
-        val iconW = (76 * density * scale).toInt()
-        val iconH = (90 * density * scale).toInt()
-        val topPad = (16 * density).toInt()
-        val leftPad = (8 * density).toInt()
-        val gapX = (6 * density * scale).toInt()
-        val gapY = (8 * density * scale).toInt()
-        val cols = if (scale > 1.15f) 3 else if (scale < 0.85f) 5 else 4
+        val scale = Prefs.getIconScale(this).coerceIn(0.65f, 1.6f)
+        val showNames = Prefs.showIconNames(this)
+        val baseW = 72f
+        val baseH = if (showNames) 96f else 72f
+        val iconW = (baseW * density * scale).toInt().coerceAtLeast((48 * density).toInt())
+        val iconH = (baseH * density * scale).toInt().coerceAtLeast((48 * density).toInt())
+        val topPad = (12 * density).toInt()
+        val leftPad = (10 * density).toInt()
+        // Keep comfortable gaps even when scale is small
+        val gapX = (10 * density).toInt().coerceAtLeast(8)
+        val gapY = (12 * density).toInt().coerceAtLeast(8)
+        val usableW = desktop.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels
+        val cols = ((usableW - leftPad) / (iconW + gapX)).coerceIn(3, 8)
         val positions = loadPositions()
         val recycle = Prefs.getRecycle(this)
         val hidden = Prefs.getHiddenApps(this)
@@ -310,7 +315,7 @@ class MainActivity : AppCompatActivity() {
         if (!recycle.contains("sys:ast")) {
             val astView = LayoutInflater.from(this).inflate(R.layout.item_desktop_icon, desktop, false)
             astView.findViewById<ImageView>(R.id.appIcon).setImageResource(R.drawable.ast_icon)
-            astView.findViewById<TextView>(R.id.appLabel).text = "AST"
+            styleIconLabel(astView.findViewById(R.id.appLabel), "AST")
             placeIcon(astView, "sys:ast", index, positions, leftPad, topPad, iconW, iconH, gapX, gapY, cols)
             bindIconTouch(astView, "sys:ast", onOpen = { openInternal("ast", "AST Terminal") }, onDelete = {
                 Prefs.moveToRecycle(this, "sys:ast"); layoutDesktop()
@@ -384,10 +389,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun styleIconLabel(label: TextView, text: String) {
+        label.text = text
+        val fs = Prefs.getFontScale(this).coerceIn(0.7f, 1.5f)
+        label.textSize = 10f * fs
+        label.visibility = if (Prefs.showIconNames(this)) View.VISIBLE else View.GONE
+    }
+
     private fun inflateAppIcon(app: AppInfo): View {
         val view = LayoutInflater.from(this).inflate(R.layout.item_desktop_icon, desktop, false)
         view.findViewById<ImageView>(R.id.appIcon).setImageDrawable(app.icon)
-        view.findViewById<TextView>(R.id.appLabel).text = app.label
+        styleIconLabel(view.findViewById(R.id.appLabel), app.label)
         return view
     }
 
@@ -396,16 +408,17 @@ class MainActivity : AppCompatActivity() {
         val icon = view.findViewById<ImageView>(R.id.appIcon)
         icon.visibility = View.GONE
         val plate = view.findViewById<View>(R.id.iconBg).parent as FrameLayout
+        val scale = Prefs.getIconScale(this)
         plate.addView(TextView(this).apply {
             text = emoji
-            textSize = 26f
+            textSize = 24f * scale
             gravity = Gravity.CENTER
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
         })
-        view.findViewById<TextView>(R.id.appLabel).text = label
+        styleIconLabel(view.findViewById(R.id.appLabel), label)
         return view
     }
 
@@ -530,27 +543,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDesktopContextMenu(anchor: View, key: String, onOpen: () -> Unit) {
-        val popup = android.widget.PopupMenu(this, anchor)
+        val popup = android.widget.PopupMenu(this, anchor, Gravity.END)
         popup.menu.add(0, 1, 0, "Aç")
-        popup.menu.add(0, 2, 1, "İkon: Küçük")
-        popup.menu.add(0, 3, 2, "İkon: Normal")
-        popup.menu.add(0, 4, 3, "İkon: Büyük")
-        popup.menu.add(0, 5, 4, "Yeni klasör")
-        popup.menu.add(0, 6, 5, "Yeni dosya")
-        if (key != "sys:trash") popup.menu.add(0, 7, 6, "Çöp kutusuna taşı")
+        popup.menu.add(0, 2, 1, "⚙ Seçenekler")
+        popup.menu.add(0, 3, 2, "Yeni klasör")
+        popup.menu.add(0, 4, 3, "Yeni dosya")
+        if (key != "sys:trash") popup.menu.add(0, 5, 4, "Çöp kutusuna taşı")
+        try {
+            val fieldMPopup = popup.javaClass.getDeclaredField("mPopup")
+            fieldMPopup.isAccessible = true
+            val mPopup = fieldMPopup.get(popup)
+            mPopup?.javaClass?.getDeclaredMethod("setForceShowIcon", Boolean::class.java)?.invoke(mPopup, true)
+        } catch (_: Exception) {}
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> onOpen()
-                2 -> { Prefs.setIconScale(this, 0.75f); layoutDesktop() }
-                3 -> { Prefs.setIconScale(this, 1.0f); layoutDesktop() }
-                4 -> { Prefs.setIconScale(this, 1.35f); layoutDesktop() }
-                5 -> createDesktopFolder()
-                6 -> createDesktopFile()
-                7 -> sendToTrash(key)
+                2 -> openOptionsPanel()
+                3 -> createDesktopFolder()
+                4 -> createDesktopFile()
+                5 -> sendToTrash(key)
             }
             true
         }
         popup.show()
+    }
+
+    private fun openOptionsPanel() {
+        openInternal("options", "Seçenekler")
     }
 
     private fun createDesktopFolder() {
@@ -662,18 +681,14 @@ class MainActivity : AppCompatActivity() {
         val popup = android.widget.PopupMenu(this, anchor)
         popup.menu.add(0, 1, 0, "Yeni klasör")
         popup.menu.add(0, 2, 1, "Yeni dosya")
-        popup.menu.add(0, 3, 2, "İkon: Küçük")
-        popup.menu.add(0, 4, 3, "İkon: Normal")
-        popup.menu.add(0, 5, 4, "İkon: Büyük")
-        popup.menu.add(0, 6, 5, "Yenile")
+        popup.menu.add(0, 3, 2, "⚙ Seçenekler")
+        popup.menu.add(0, 4, 3, "Yenile")
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> createDesktopFolder()
                 2 -> createDesktopFile()
-                3 -> { Prefs.setIconScale(this, 0.75f); layoutDesktop() }
-                4 -> { Prefs.setIconScale(this, 1.0f); layoutDesktop() }
-                5 -> { Prefs.setIconScale(this, 1.35f); layoutDesktop() }
-                6 -> layoutDesktop()
+                3 -> openOptionsPanel()
+                4 -> layoutDesktop()
             }
             true
         }
@@ -726,6 +741,9 @@ class MainActivity : AppCompatActivity() {
             )
             "calendar" -> content.addView(
                 LayoutInflater.from(this).inflate(R.layout.panel_calendar, content, false).also { fillCalendar(it) }
+            )
+            "options" -> content.addView(
+                LayoutInflater.from(this).inflate(R.layout.panel_options, content, false).also { fillOptions(it) }
             )
         }
 
@@ -869,51 +887,55 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshTaskbar() {
         taskbarApps.removeAllViews()
-        fun addDock(label: String, emoji: String? = null, resId: Int? = null, onClick: () -> Unit) {
+        fun addDockIconOnly(content: (LinearLayout) -> Unit, onClick: () -> Unit) {
             val wrap = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                setPadding(12, 6, 12, 6)
+                orientation = LinearLayout.VERTICAL
+                gravity = android.view.Gravity.CENTER
+                setPadding(10, 6, 10, 6)
                 setOnClickListener { onClick() }
                 setBackgroundResource(R.drawable.bg_dock_item)
+                minimumWidth = (40 * resources.displayMetrics.density).toInt()
                 val lp = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.MATCH_PARENT
                 )
-                lp.marginEnd = 6
+                lp.marginEnd = 4
                 layoutParams = lp
             }
-            if (resId != null) {
-                wrap.addView(ImageView(this).apply {
-                    setImageResource(resId)
-                    layoutParams = LinearLayout.LayoutParams(22, 22)
-                    scaleType = ImageView.ScaleType.FIT_CENTER
-                })
-            } else if (emoji != null) {
-                wrap.addView(TextView(this).apply {
-                    text = emoji
-                    textSize = 14f
-                    setPadding(0, 0, 6, 0)
-                })
-            }
-            wrap.addView(TextView(this).apply {
-                text = label
-                setTextColor(0xFFEEEEEE.toInt())
-                textSize = 11f
-                maxLines = 1
-            })
+            content(wrap)
             taskbarApps.addView(wrap)
         }
-        addDock("AST", resId = R.drawable.ast_icon) { openInternal("ast", "AST Terminal") }
-        addDock("Dosyalar", emoji = "📁") { openInternal("files", "Dosya Gezgini") }
-        addDock("Store", emoji = "🛒") { openPlayStore() }
-        openWindows.values.forEach { w ->
-            val mark = if (w.minimized) "• " else ""
-            addDock(mark + w.title.take(12), emoji = "▣") {
-                if (w.minimized) restoreWindow(w.id) else bringFront(w.id)
+        addDockIconOnly({ w ->
+            w.addView(ImageView(this).apply {
+                setImageResource(R.drawable.ast_icon)
+                layoutParams = LinearLayout.LayoutParams(26, 26)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+            })
+        }) { openInternal("ast", "AST Terminal") }
+        addDockIconOnly({ w ->
+            w.addView(TextView(this).apply { text = "📁"; textSize = 18f })
+        }) { openInternal("files", "Dosya Gezgini") }
+        addDockIconOnly({ w ->
+            w.addView(TextView(this).apply { text = "🛒"; textSize = 18f })
+        }) { openPlayStore() }
+        openWindows.values.forEach { win ->
+            addDockIconOnly({ w ->
+                w.addView(TextView(this).apply {
+                    text = if (win.minimized) "▢" else "▣"
+                    textSize = 16f
+                    setTextColor(0xFFB8FF1A.toInt())
+                })
+            }) {
+                if (win.minimized) restoreWindow(win.id) else bringFront(win.id)
             }
         }
-        addDock("Uygulamalar", emoji = "☰") { openAppDrawer() }
+        addDockIconOnly({ w ->
+            w.addView(TextView(this).apply {
+                text = "☰"
+                textSize = 18f
+                setTextColor(0xFFB8FF1A.toInt())
+            })
+        }) { openAppDrawer() }
     }
 
     private var drawerOverlay: View? = null
@@ -1257,6 +1279,77 @@ class MainActivity : AppCompatActivity() {
             })
         } catch (_: Exception) {
             Toast.makeText(this, "Mağaza açılamadı", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private fun fillOptions(root: View) {
+        val iconSeek = root.findViewById<android.widget.SeekBar>(R.id.optIconSeek)
+        val fontSeek = root.findViewById<android.widget.SeekBar>(R.id.optFontSeek)
+        val iconVal = root.findViewById<TextView>(R.id.optIconValue)
+        val fontVal = root.findViewById<TextView>(R.id.optFontValue)
+        val namesOn = root.findViewById<TextView>(R.id.optNamesOn)
+        val namesOff = root.findViewById<TextView>(R.id.optNamesOff)
+
+        // map scale 0.65..1.6 -> progress 0..100
+        fun scaleToProg(s: Float) = (((s - 0.65f) / (1.6f - 0.65f)) * 100).toInt().coerceIn(0, 100)
+        fun progToScale(p: Int) = 0.65f + (p / 100f) * (1.6f - 0.65f)
+
+        iconSeek.progress = scaleToProg(Prefs.getIconScale(this))
+        fontSeek.progress = scaleToProg(Prefs.getFontScale(this).coerceIn(0.65f, 1.6f))
+        iconVal.text = "${(Prefs.getIconScale(this) * 100).toInt()}%"
+        fontVal.text = "${(Prefs.getFontScale(this) * 100).toInt()}%"
+
+        fun refreshNamesBtns() {
+            val on = Prefs.showIconNames(this)
+            namesOn.setBackgroundResource(if (on) R.drawable.bg_choice_sel else R.drawable.bg_choice)
+            namesOff.setBackgroundResource(if (!on) R.drawable.bg_choice_sel else R.drawable.bg_choice)
+        }
+        refreshNamesBtns()
+
+        iconSeek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                val s = progToScale(progress)
+                iconVal.text = "${(s * 100).toInt()}%"
+                if (fromUser) {
+                    Prefs.setIconScale(this@MainActivity, s)
+                    layoutDesktop()
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+        fontSeek.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
+                val s = progToScale(progress)
+                fontVal.text = "${(s * 100).toInt()}%"
+                if (fromUser) {
+                    Prefs.setFontScale(this@MainActivity, s)
+                    layoutDesktop()
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+        namesOn.setOnClickListener {
+            Prefs.setShowIconNames(this, true); refreshNamesBtns(); layoutDesktop()
+        }
+        namesOff.setOnClickListener {
+            Prefs.setShowIconNames(this, false); refreshNamesBtns(); layoutDesktop()
+        }
+        root.findViewById<View>(R.id.optWallPick).setOnClickListener {
+            val i = Intent(Intent.ACTION_GET_CONTENT).setType("image/*")
+            startActivityForResult(Intent.createChooser(i, "Arka plan"), 2001)
+        }
+        root.findViewById<View>(R.id.optWallDefault).setOnClickListener {
+            getSharedPreferences("astrasage_os", MODE_PRIVATE).edit().remove("custom_wall").apply()
+            wallpaper.setImageResource(R.drawable.wallpaper)
+            Toast.makeText(this, "Varsayılan arka plan", Toast.LENGTH_SHORT).show()
+        }
+        root.findViewById<View>(R.id.optApply).setOnClickListener {
+            layoutDesktop()
+            Toast.makeText(this, "Uygulandı", Toast.LENGTH_SHORT).show()
+            closeWindow("options")
         }
     }
 
