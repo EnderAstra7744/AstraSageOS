@@ -1647,9 +1647,15 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun toggleStartMenu() {
-        if (startMenu.isVisible) hideStart() else {
-            populateStartMenu()
-            startMenu.isVisible = true
+        try {
+            if (startMenu.isVisible) {
+                hideStart()
+            } else {
+                populateStartMenu()
+                startMenu.visibility = View.VISIBLE
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Başlat: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -1688,50 +1694,72 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun populateStartMenu() {
-        val panel = findViewById<View>(R.id.startMenuPanel)
-        panel?.setOnClickListener { /* consume */ }
-        // Drag start menu panel
-        panel?.let { enableStartMenuDrag(it) }
-        findViewById<TextView>(R.id.startUserLabel)?.text = Prefs.getUser(this).ifBlank { "Kullanıcı" }
-        val grid = findViewById<android.widget.GridLayout>(R.id.startPinnedGrid) ?: return
-        grid.removeAllViews()
-        data class Tile(val label: String, val icon: Int, val action: () -> Unit)
-        val tiles = listOf(
-            Tile("Not Defteri", R.drawable.ic_docs) { hideStart(); openInternal("notepad", "Not Defteri") },
-            Tile("Paint", R.drawable.ic_options) { hideStart(); openInternal("paint", "Paint") },
-            Tile("Hava", R.drawable.ic_network) { hideStart(); openInternal("weather", "Hava Durumu") },
-            Tile("Müzik", R.drawable.ic_folder) { hideStart(); openInternal("music", "Müzik") },
-            Tile("Chrome", R.drawable.ic_network) { hideStart(); openChrome() },
-            Tile("AST", R.drawable.ast_icon) { hideStart(); openInternal("ast", "AST Terminal") },
-            Tile("Disk", R.drawable.ic_thispc) { hideStart(); openInternal("disk", "Disk") },
-            Tile("Dosyalar", R.drawable.ic_folder) { hideStart(); openInternal("files", "Dosya Gezgini") }
-        )
-        tiles.forEach { tile ->
-            val v = LayoutInflater.from(this).inflate(R.layout.item_start_tile, grid, false)
-            v.findViewById<android.widget.ImageView>(R.id.tileIcon).setImageResource(tile.icon)
-            v.findViewById<TextView>(R.id.tileLabel).text = tile.label
-            v.setOnClickListener { tile.action() }
-            grid.addView(v)
-        }
-        val rec = findViewById<LinearLayout>(R.id.startRecommended) ?: return
-        rec.removeAllViews()
-        listOf(
-            "Bu Bilgisayar" to { hideStart(); openInternal("thispc", "Bu Bilgisayar") },
-            "Seçenekler" to { hideStart(); openOptionsPanel() },
-            "Desktop Ortamı" to { hideStart(); openDeSelector() },
-            "Oturumu kapat" to {
-                hideStart()
-                startActivity(Intent(this, SetupActivity::class.java))
-                finish()
+        try {
+            val panel = findViewById<View>(R.id.startMenuPanel)
+            panel?.setOnClickListener { /* consume */ }
+            panel?.let { enableStartMenuDrag(it) }
+            findViewById<TextView>(R.id.startUserLabel)?.text =
+                Prefs.getUser(this).ifBlank { "Kullanıcı" }
+
+            val grid = findViewById<android.widget.GridLayout>(R.id.startPinnedGrid)
+            if (grid == null) {
+                Toast.makeText(this, "Başlat menüsü yüklenemedi", Toast.LENGTH_SHORT).show()
+                return
             }
-        ).forEach { (label, act) ->
-            rec.addView(TextView(this).apply {
-                text = label
-                setTextColor(0xFFEEEEEE.toInt())
-                textSize = 13f
-                setPadding(12, 14, 12, 14)
-                setOnClickListener { act() }
-            })
+            grid.removeAllViews()
+            val density = resources.displayMetrics.density
+            val tileSize = (76 * density).toInt()
+            val margin = (4 * density).toInt()
+
+            data class Tile(val label: String, val icon: Int, val action: () -> Unit)
+            val tiles = listOf(
+                Tile("Not Defteri", R.drawable.ic_docs) { hideStart(); openInternal("notepad", "Not Defteri") },
+                Tile("Paint", R.drawable.ic_options) { hideStart(); openInternal("paint", "Paint") },
+                Tile("Hava", R.drawable.ic_network) { hideStart(); openInternal("weather", "Hava Durumu") },
+                Tile("Müzik", R.drawable.ic_folder) { hideStart(); openInternal("music", "Müzik") },
+                Tile("Chrome", R.drawable.ic_network) { hideStart(); openChrome() },
+                Tile("AST", R.drawable.ast_icon) { hideStart(); openInternal("ast", "AST Terminal") },
+                Tile("Disk", R.drawable.ic_thispc) { hideStart(); openInternal("disk", "Disk") },
+                Tile("Dosyalar", R.drawable.ic_folder) { hideStart(); openInternal("files", "Dosya Gezgini") }
+            )
+            tiles.forEachIndexed { index, tile ->
+                val v = LayoutInflater.from(this).inflate(R.layout.item_start_tile, grid, false)
+                v.findViewById<android.widget.ImageView>(R.id.tileIcon)?.setImageResource(tile.icon)
+                v.findViewById<TextView>(R.id.tileLabel)?.text = tile.label
+                v.setOnClickListener { tile.action() }
+                val lp = android.widget.GridLayout.LayoutParams().apply {
+                    width = tileSize
+                    height = tileSize
+                    columnSpec = android.widget.GridLayout.spec(index % 4)
+                    rowSpec = android.widget.GridLayout.spec(index / 4)
+                    setMargins(margin, margin, margin, margin)
+                }
+                grid.addView(v, lp)
+            }
+
+            val rec = findViewById<LinearLayout>(R.id.startRecommended)
+            rec?.removeAllViews()
+            listOf(
+                "Bu Bilgisayar" to { hideStart(); openInternal("thispc", "Bu Bilgisayar") },
+                "Seçenekler" to { hideStart(); openOptionsPanel() },
+                "Desktop Ortamı" to { hideStart(); openDeSelector() },
+                "Oturumu kapat" to {
+                    hideStart()
+                    startActivity(Intent(this, SetupActivity::class.java))
+                    finish()
+                }
+            ).forEach { (label, act) ->
+                rec?.addView(TextView(this).apply {
+                    text = label
+                    setTextColor(0xFFEEEEEE.toInt())
+                    textSize = 13f
+                    setPadding(12, 14, 12, 14)
+                    setOnClickListener { act() }
+                })
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Başlat hatası: ${e.message}", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
         }
     }
 
@@ -1956,9 +1984,9 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun enableStartMenuDrag(panel: View) {
-        val handle = panel.findViewById<View>(R.id.startDragHandle) ?: panel
-        if (handle.getTag(0x51A7) == true) return
-        handle.setTag(0x51A7, true)
+        val handle = panel.findViewById<View>(R.id.startDragHandle) ?: return
+        if (handle.tag == "drag_ready") return
+        handle.tag = "drag_ready"
         var dX = 0f
         var dY = 0f
         handle.setOnTouchListener { _, e ->
