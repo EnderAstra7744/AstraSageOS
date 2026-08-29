@@ -12,9 +12,8 @@ Gerçek telefon uygulamaları + gerçek dosya sistemi + masaüstü arayüzü.
 - Başlat menüsü, görev çubuğu
 
 ## Çalıştırma
-1. Android Studio ile `AstraSageOS` klasörünü aç
-2. Sync + Run
-3. Dosya gezgini için Android 11+: **Tüm dosyalara erişim** izni ver
+1. Relese kısmından .apk dosyasını indirin
+2. Kurun ve sonra tadını çıkarın
 
 ## Not
 HTML simülasyon kaldırıldı; sadece native uygulama.
