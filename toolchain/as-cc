@@ -1,0 +1,97 @@
+#!/bin/sh
+# as-cc - cross compiler driver for AstraSageOS native programs (runs on the build computer, not inside the OS).
+#
+# Target (read from the kernel sources, not guessed):
+#   - 32-bit x86 (i386), cdecl, no SSE/MMX, flat memory, programs run in kernel mode        (boot/, kernel/native.c)
+#   - one ELF32 EXEC file linked at NATIVE_BASE 0x05000000, entry  int as_main(const as_api*, const char*)  (native/app.ld, as_api.h)
+#   - no system calls: everything goes through the as_api table; there is no dynamic loader
+# Stages: preprocess+compile (backend) -> object files -> ld (native/app.ld [+ libc]) -> as-check.py -> install.
+# Backends: gcc (default), clang, tcc (C only).  Nothing is ever executed, and the output file is replaced only after
+# every stage and the ELF check succeeded (a failed build leaves the previous output untouched).
+set -u
+HERE=$(cd "$(dirname "$0")" && pwd)
+ROOT=$(cd "$HERE/.." && pwd)
+NATIVE="$ROOT/native"
+BACKEND=${AS_BACKEND:-gcc}
+OUT=a.elf; LIBC=0; OPT=-O2; KEEP=0; EXTRA=""
+SRCS=""
+usage() {
+  cat <<U
+Usage: as-cc [options] source.(c|cpp|cc|S) ...
+  -o FILE        output ELF (default a.elf)
+  --backend B    gcc | clang | tcc   (or AS_BACKEND=...; tcc: set AS_TCC=/path/to/i386-tcc, see build-tcc.sh)
+  --libc         also link the AstraSageOS C library (native/libc/libc.c, built by gcc/clang once and cached)
+  -O0|-O1|-O2|-Os  optimisation (tcc ignores it)
+  -I DIR / -D X  passed to the compiler
+  --keep         keep the intermediate objects in ./as-cc-build
+  --version      show the target description
+U
+}
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o) OUT=$2; shift 2;;
+    --backend) BACKEND=$2; shift 2;;
+    --libc) LIBC=1; shift;;
+    -O0|-O1|-O2|-Os) OPT=$1; shift;;
+    -I|-D) EXTRA="$EXTRA $1$2"; shift 2;;
+    -I*|-D*) EXTRA="$EXTRA $1"; shift;;
+    --keep) KEEP=1; shift;;
+    --version) echo "as-cc: target i386-astrasage (ELF32 EXEC @0x05000000, entry as_main, kernel mode, no syscalls)"; exit 0;;
+    -h|--help) usage; exit 0;;
+    -*) echo "as-cc: unknown option $1" >&2; exit 2;;
+    *) SRCS="$SRCS $1"; shift;;
+  esac
+done
+[ -n "$SRCS" ] || { usage >&2; exit 2; }
+
+BUILD=$(mktemp -d "${TMPDIR:-/tmp}/as-cc.XXXXXX") || exit 1
+[ "$KEEP" = 1 ] && { rm -rf "$BUILD"; BUILD=./as-cc-build; mkdir -p "$BUILD"; }
+cleanup() { [ "$KEEP" = 1 ] || rm -rf "$BUILD"; }
+trap cleanup EXIT
+
+GCCINC=$(gcc -print-file-name=include 2>/dev/null)
+COMMON="-ffreestanding -fno-builtin -fno-pic -fno-pie -fno-stack-protector -fno-asynchronous-unwind-tables -nostdinc -isystem $NATIVE/libc/include -I$NATIVE $EXTRA"
+CXXONLY="-fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit"
+
+compile() {   # compile SRC OBJ
+  src=$1; obj=$2
+  case "$src" in *.cpp|*.cc|*.cxx) cxx=1;; *) cxx=0;; esac
+  case "$BACKEND" in
+    gcc)
+      if [ $cxx = 1 ]; then g++ -m32 -std=gnu++17 $OPT -Wall -mno-sse -mno-mmx $COMMON -isystem "$GCCINC" $CXXONLY -c "$src" -o "$obj"
+      else gcc -m32 -std=gnu11 $OPT -Wall -mno-sse -mno-mmx $COMMON -isystem "$GCCINC" -c "$src" -o "$obj"; fi;;
+    clang)
+      if [ $cxx = 1 ]; then clang++ --target=i386-pc-none-elf -std=gnu++17 $OPT -Wall -mno-sse -mno-mmx $COMMON $CXXONLY -c "$src" -o "$obj"
+      else clang --target=i386-pc-none-elf -std=gnu11 $OPT -Wall -mno-sse -mno-mmx $COMMON -c "$src" -o "$obj"; fi;;
+    tcc)
+      [ $cxx = 0 ] || { echo "as-cc: $src: the tcc backend compiles C only" >&2; return 1; }
+      TCC=${AS_TCC:-$HERE/../build/tcc/i386-tcc}
+      [ -x "$TCC" ] || { echo "as-cc: tcc backend not built ($TCC missing); run toolchain/build-tcc.sh" >&2; return 1; }
+      "$TCC" -nostdinc -nostdlib -I"$NATIVE/libc/include" -I"$NATIVE" $EXTRA -Wall -c "$src" -o "$obj";;
+    *) echo "as-cc: unknown backend '$BACKEND'" >&2; return 1;;
+  esac
+}
+
+OBJS=""; i=0
+for s in $SRCS; do
+  [ -f "$s" ] || { echo "as-cc: $s: no such file" >&2; exit 1; }
+  i=$((i+1)); o="$BUILD/$(basename "$s").$i.o"
+  compile "$s" "$o" || { echo "as-cc: compile failed ($s); '$OUT' was not changed" >&2; exit 1; }
+  OBJS="$OBJS $o"
+done
+
+if [ "$LIBC" = 1 ]; then                      # the C library is always built by a C compiler with full support (gcc, else clang)
+  LIBO="$ROOT/build/toolchain/libas.o"
+  if [ ! -f "$LIBO" ] || [ "$NATIVE/libc/libc.c" -nt "$LIBO" ]; then
+    mkdir -p "$ROOT/build/toolchain"
+    gcc -m32 -std=gnu11 -O2 -mno-sse -mno-mmx $COMMON -isystem "$GCCINC" -c "$NATIVE/libc/libc.c" -o "$LIBO" || { echo "as-cc: building the C library failed" >&2; exit 1; }
+  fi
+  OBJS="$LIBO $OBJS"
+fi
+
+TMPOUT="$BUILD/out.elf"
+ld -m elf_i386 -T "$NATIVE/app.ld" -nostdlib -z noexecstack -z max-page-size=16 -z common-page-size=16 --build-id=none -o "$TMPOUT" $OBJS 2> "$BUILD/ld.err" || {
+  sed 's/^/as-cc: ld: /' "$BUILD/ld.err" >&2; echo "as-cc: link failed; '$OUT' was not changed" >&2; exit 1; }
+python3 "$HERE/as-check.py" "$TMPOUT" || { echo "as-cc: the result is not a valid AstraSageOS program; '$OUT' was not changed" >&2; exit 1; }
+cp "$TMPOUT" "$OUT.new.$$" && mv -f "$OUT.new.$$" "$OUT"
+echo "as-cc: wrote $OUT ($(wc -c < "$OUT") bytes, backend $BACKEND) - built only, not run"

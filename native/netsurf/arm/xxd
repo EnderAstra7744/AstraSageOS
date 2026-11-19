@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+import sys
+a=sys.argv[1:]; assert a[0]=='-i'
+src,dst=a[1],a[2]
+d=open(src,'rb').read()
+name=''.join(c if c.isalnum() else '_' for c in src)
+with open(dst,'w') as f:
+    f.write('unsigned char %s[] = {\n'%name)
+    for i in range(0,len(d),12): f.write('  '+', '.join('0x%02x'%b for b in d[i:i+12])+(',' if i+12<len(d) else '')+'\n')
+    f.write('};\nunsigned int %s_len = %d;\n'%(name,len(d)))

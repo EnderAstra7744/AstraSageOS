@@ -1,0 +1,41 @@
+#ifndef _AS_ERRNO_H
+#define _AS_ERRNO_H
+extern int errno;
+#define EPERM 1
+#define ENOENT 2
+#define EINTR 4
+#define EIO 5
+#define EBADF 9
+#define EAGAIN 11
+#define ENOMEM 12
+#define EACCES 13
+#define EEXIST 17
+#define ENOTDIR 20
+#define EISDIR 21
+#define EINVAL 22
+#define EMFILE 24
+#define ENOSPC 28
+#define ERANGE 34
+#define ENAMETOOLONG 36
+#define E2BIG 7
+#define ENOTEMPTY 39
+#define ELOOP 40
+#define EBUSY 16
+#define EXDEV 18
+#define ENOTCONN 107
+#define ECONNREFUSED 111
+#define ECONNRESET 104
+#define EADDRINUSE 98
+#define EPIPE 32
+#define ESPIPE 29
+#define EFBIG 27
+#define EROFS 30
+#define EDOM 33
+#define ENOSYS 38
+#define ETIMEDOUT 110
+#define EWOULDBLOCK EAGAIN
+#define EINPROGRESS 115
+#define ENOTSUP 95
+#define EOVERFLOW 75
+#define EILSEQ 84
+#endif

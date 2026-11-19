@@ -1,0 +1,13 @@
+diff --git a/src/surface/Makefile b/src/surface/Makefile
+index 848c3d4..b851e59 100644
+--- a/src/surface/Makefile
++++ b/src/surface/Makefile
+@@ -1,7 +1,7 @@
+ # Sources
+ 
+ # Common surface code and heap based surface handler
+-SURFACE_HANDLER_yes := surface.c ram.c
++SURFACE_HANDLER_yes := surface.c ram.c astra.c
+ 
+ # optional surface handlers
+ SURFACE_HANDLER_$(NSFB_SDL_AVAILABLE) += sdl.c

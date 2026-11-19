@@ -1,0 +1,20 @@
+start;
+func main(void) {
+    s = "  Hello World  ";
+    assert s.strip() == "Hello World";
+    assert "abc".bigger() == "ABC" and "ABC".smalest() == "abc";
+    assert "a-b-c".split("-") == ["a", "b", "c"];
+    assert "-".join(["a", "b"]) == "a-b";
+    assert "hello".replace("l", "L") == "heLLo";
+    assert "hello".startswith("he") and "hello".endswith("lo");
+    assert "hello".find("l") == 2 and "hello".find("z") == -1;
+    x = 5;
+    assert %strt%inter"x is {x}" == "x is 5";
+    name = "Ali";
+    assert "a" + "b" == "ab" and "ab" * 2 == "abab";
+    assert "abc" < "abd";
+    assert len("çay") == 3;
+    printc("strings ok");
+    end;
+};
+end;

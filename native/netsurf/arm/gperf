@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+# minimal gperf stand-in: enough for hubbub's element-type.gperf (case-insensitive lookup by name, struct with name first)
+import sys, re
+out = None; inp = None
+for a in sys.argv[1:]:
+    if a.startswith("--output-file="): out = a.split("=", 1)[1]
+    else: inp = a
+s = open(inp).read()
+pre = re.search(r"%\{(.*?)%\}", s, re.S).group(1)
+decl, body = s.split("%%", 1)
+struct = re.search(r"^struct\s+(\w+)\s*;", decl, re.M).group(1)
+hname = re.search(r"hash-function-name\s+(\w+)", decl).group(1)
+lname = re.search(r"lookup-function-name\s+(\w+)", decl).group(1)
+rows = []
+for l in body.splitlines():
+    l = l.strip()
+    if not l or l.startswith("%"): continue
+    n, rest = l.split(",", 1)
+    rows.append((n.strip(), rest.strip()))
+rows.sort(key=lambda r: r[0].lower())
+o = [pre, "\n"]
+o.append("static const struct %s wordlist[] = {\n" % struct)
+for n, r in rows: o.append('\t{ "%s", %s },\n' % (n, r))
+o.append("};\n")
+o.append('''static unsigned %s(const char *str, size_t len) { unsigned h = 0; while (len--) h = h * 31 + (unsigned char)(*str++ | 0x20); return h; }
+static int cmp_ci_(const char *a, size_t al, const char *b)
+{
+	size_t bl = strlen(b), i, n = al < bl ? al : bl;
+	for (i = 0; i < n; i++) {
+		int x = (unsigned char)a[i], y = (unsigned char)b[i];
+		if (x >= 'A' && x <= 'Z') x += 32;
+		if (y >= 'A' && y <= 'Z') y += 32;
+		if (x != y) return x - y;
+	}
+	return (al > bl) - (al < bl);
+}
+const struct %s *%s(const char *str, size_t len)
+{
+	size_t lo = 0, hi = sizeof wordlist / sizeof wordlist[0];
+	while (lo < hi) {
+		size_t mid = (lo + hi) / 2;
+		int c = cmp_ci_(str, len, wordlist[mid].name);
+		if (c == 0) return &wordlist[mid];
+		if (c < 0) hi = mid; else lo = mid + 1;
+	}
+	return 0;
+}
+''' % (hname, struct, lname))
+open(out, "w").write("".join(o))

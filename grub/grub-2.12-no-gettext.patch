@@ -1,0 +1,41 @@
+diff --git a/Makefile.am b/Makefile.am
+index 43635d5..1c70824 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -5,7 +5,7 @@ SUBDIRS = grub-core/lib/gnulib .
+ if COND_real_platform
+ SUBDIRS += grub-core
+ endif
+-SUBDIRS += po docs util/bash-completion.d
++SUBDIRS += util/bash-completion.d
+ 
+ include $(top_srcdir)/conf/Makefile.common
+ include $(top_srcdir)/conf/Makefile.extra-dist
+diff --git a/configure.ac b/configure.ac
+index cd667a2..721c594 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -374,8 +374,12 @@ test "x$GCC" = xyes || AC_MSG_ERROR([GCC is required])
+ 
+ AC_CHECK_PROG(HAVE_CXX, $CXX, yes, no)
+ 
+-AM_GNU_GETTEXT([external])
+-AM_GNU_GETTEXT_VERSION([0.18.3])
++USE_NLS=no
++AC_SUBST([USE_NLS])
++AC_SUBST([MSGFMT], [:])
++AC_SUBST([XGETTEXT], [:])
++AC_SUBST([MSGMERGE], [:])
++AC_SUBST([GMSGFMT], [:])
+ AC_SYS_LARGEFILE
+ 
+ PLATFORMS_PCI=" $(PYTHONPATH="${srcdir}" $PYTHON -c 'import gentpl; print(" ".join(gentpl.GROUPS[["pci"]]))') "
+@@ -2235,8 +2239,6 @@ fi
+ AC_CONFIG_FILES([Makefile])
+ AC_CONFIG_FILES([grub-core/Makefile])
+ AC_CONFIG_FILES([grub-core/lib/gnulib/Makefile])
+-AC_CONFIG_FILES([po/Makefile.in])
+-AC_CONFIG_FILES([docs/Makefile])
+ AC_CONFIG_FILES([util/bash-completion.d/Makefile])
+ AC_CONFIG_FILES([stamp-h], [echo timestamp > stamp-h])
+ AC_CONFIG_FILES([config.h])

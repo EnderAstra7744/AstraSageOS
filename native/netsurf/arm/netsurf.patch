@@ -1,0 +1,54 @@
+diff --git a/content/fetch.c b/content/fetch.c
+index f090039..509cea3 100644
+--- a/content/fetch.c
++++ b/content/fetch.c
+@@ -55,6 +55,9 @@
+ #include "content/fetchers/resource.h"
+ #include "content/fetchers/about/about.h"
+ #include "content/fetchers/curl.h"
++#ifdef AS_ASTRA
++#include "content/fetchers/astra.h"
++#endif
+ #include "content/fetchers/data.h"
+ #include "content/fetchers/file/file.h"
+ #include "javascript/fetcher.h"
+@@ -292,6 +295,12 @@ nserror fetcher_init(void)
+ 		return ret;
+ 	}
+ #endif
++#ifdef AS_ASTRA
++	ret = fetch_astra_register();
++	if (ret != NSERROR_OK) {
++		return ret;
++	}
++#endif
+ 
+ 	ret = fetch_data_register();
+ 	if (ret != NSERROR_OK) {
+diff --git a/content/fetchers/Makefile b/content/fetchers/Makefile
+index 8f6e521..ecba71a 100644
+--- a/content/fetchers/Makefile
++++ b/content/fetchers/Makefile
+@@ -1,6 +1,6 @@
+ # Content fetchers sources
+ 
+-S_FETCHERS_YES := data.c resource.c
++S_FETCHERS_YES := data.c resource.c astra.c
+ S_FETCHERS_NO :=
+ S_FETCHERS_$(NETSURF_USE_CURL) += curl.c
+ 
+diff --git a/frontends/framebuffer/fbtk/event.c b/frontends/framebuffer/fbtk/event.c
+index 7a58091..28f96f4 100644
+--- a/frontends/framebuffer/fbtk/event.c
++++ b/frontends/framebuffer/fbtk/event.c
+@@ -302,6 +302,10 @@ fbtk_keycode_to_ucs4(int code, fbtk_modifier_type mods)
+ {
+ 	int ucs4 = -1;
+ 
++	/* AstraSageOS: the OS keyboard already delivers capital letters as typed */
++	if (mods == FBTK_MOD_CLEAR && code >= 'A' && code <= 'Z')
++		return code;
++
+ 	if (mods & FBTK_MOD_LSHIFT || mods & FBTK_MOD_RSHIFT) {
+ 		if ((code >= 0) && (code < (int) NOF_ELEMENTS(sh_keymap)))
+ 			ucs4 = sh_keymap[code];

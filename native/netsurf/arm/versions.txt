@@ -1,0 +1,11 @@
+libcss d0b2079
+libdom e4150b6
+libhubbub 68989e6
+libparserutils c997126
+libwapcaplet 74e4921
+libnsbmp 3406e7e
+libnsgif 56d27be
+libnsfb a287525
+libnsutils 4f0b882
+buildsystem b38fe71
+netsurf f08191a

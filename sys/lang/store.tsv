@@ -1,0 +1,133 @@
+All	Todo	Все	全部
+Developer	Desarrollo	Разработка	开发
+Internet	Internet	Интернет	互联网
+C (native)	C (nativo)	C (нативный)	C（原生）
+Working...	Trabajando...	Выполняется...	处理中...
+Open	Abrir	Открыть	打开
+Install	Instalar	Установить	安装
+Coming soon	Próximamente	Скоро	即将推出
+App store	Tienda de apps	Магазин	应用商店
+Discover	Descubrir	Обзор	发现
+Downloaded	Descargas	Загрузки	已下载
+installed	instalada	установлено	已安装
+Not signed in	Sin iniciar sesión	Вход не выполнен	未登录
+Search apps	Buscar apps	Поиск приложений	搜索应用
+FEATURED	DESTACADAS	РЕКОМЕНДУЕМОЕ	精选
+Results	Resultados	Результаты	结果
+All apps	Todas las apps	Все приложения	所有应用
+No app matches your search.	Ninguna app coincide con tu búsqueda.	Ничего не найдено.	没有符合搜索的应用。
+Version	Versión	Версия	版本
+Remove	Quitar	Удалить	移除
+Update	Actualizar	Обновить	更新
+Nothing installed yet.	Aún no hay nada instalado.	Пока ничего не установлено.	尚未安装任何应用。
+Open Discover to find apps.	Abre Descubrir para encontrar apps.	Откройте «Обзор», чтобы найти приложения.	打开“发现”来查找应用。
+< Back	< Atrás	< Назад	< 返回
+Category	Categoría	Категория	类别
+Language	Idioma	Язык	语言
+Price	Precio	Цена	价格
+Free	Gratis	Бесплатно	免费
+Status	Estado	Состояние	状态
+Installed	Instalada	Установлено	已安装
+Not installed	No instalada	Не установлено	未安装
+Screenshots	Capturas	Снимки экрана	截图
+No screenshots yet.	Aún no hay capturas.	Снимков пока нет.	暂无截图。
+Sign in first (open AST to log in).	Inicia sesión primero (abre AST para entrar).	Сначала войдите (откройте AST).	请先登录（打开 AST 登录）。
+Another download is still running - try again in a moment.	Otra descarga sigue en curso: inténtalo en un momento.	Другая загрузка ещё идёт — повторите чуть позже.	另一个下载仍在进行——请稍后重试。
+Checking the system folders and files (root)	Comprobando carpetas y archivos del sistema (raíz)	Проверка системных папок и файлов (корень)	正在检查系统文件夹和文件（根目录）
+Checking drive S:	Comprobando la unidad S:	Проверка диска S:	正在检查驱动器 S:
+Preparing the config folder	Preparando la carpeta config	Подготовка папки config	正在准备 config 文件夹
+created folder	carpeta creada	папка создана	已创建文件夹
+created file	archivo creado	файл создан	已创建文件
+FAILED	ERROR	СБОЙ	失败
+file	archivo	файл	文件
+Saving your choices	Guardando tus opciones	Сохранение ваших настроек	正在保存你的选择
+Writing to the disk	Escribiendo en el disco	Запись на диск	正在写入磁盘
+saved to disk	guardado en disco	сохранено на диск	已保存到磁盘
+(no disk: memory only)	(sin disco: solo memoria)	(нет диска: только память)	（无磁盘：仅内存）
+Setup finished	Instalación terminada	Установка завершена	安装完成
+package queued:	paquete en cola:	пакет в очереди:	软件包已排队:
+White (default)	Blanco (predeterminado)	Белая (по умолчанию)	白色（默认）
+Black	Negro	Чёрная	黑色
+Green	Verde	Зелёная	绿色
+Light windows and dock	Ventanas y dock claros	Светлые окна и док	明亮的窗口和程序坞
+Dark, like older versions	Oscuro, como las versiones antiguas	Тёмная, как в старых версиях	深色，和旧版本一样
+Dark green	Verde oscuro	Тёмно-зелёная	深绿色
+Continue	Continuar	Продолжить	继续
+Choose the language of AstraSageOS windows and menus.	Elige el idioma de las ventanas y menús de AstraSageOS.	Выберите язык окон и меню AstraSageOS.	选择 AstraSageOS 窗口和菜单的语言。
+Theme	Tema	Тема	主题
+Dock, windows and every place that was black in older versions follow it.	El dock, las ventanas y todo lo que era negro en versiones antiguas lo siguen.	Док, окна и всё, что раньше было чёрным, следуют ей.	程序坞、窗口以及旧版本中所有黑色的地方都会跟随主题。
+Sign-in	Inicio de sesión	Вход	登录方式
+How should signing in work?	¿Cómo debe funcionar el inicio de sesión?	Как должен работать вход?	登录应该如何进行？
+Graphic	Gráfico	Графический	图形界面
+Terminal	Terminal	Терминал	终端
+Name and password in a window\nwith the user icon	Nombre y contraseña en una ventana\ncon el icono de usuario	Имя и пароль в окне\nс иконкой пользователя	在带用户图标的窗口中\n输入名称和密码
+The normal AST terminal asks\nfor your login	El terminal AST normal\npide tu inicio de sesión	Обычный терминал AST\nзапрашивает вход	普通的 AST 终端\n会要求你登录
+Drives	Unidades	Диски	驱动器
+Detected automatically. Choose the drive that holds the package repository.	Detectadas automáticamente. Elige la unidad con el repositorio de paquetes.	Определено автоматически. Выберите диск с репозиторием пакетов.	已自动检测。请选择存放软件包仓库的驱动器。
+Drive 1 (secondary disk)	Unidad 1 (disco secundario)	Диск 1 (второй диск)	驱动器 1（副磁盘）
+Drive 0 (system disk)	Unidad 0 (disco del sistema)	Диск 0 (системный диск)	驱动器 0（系统磁盘）
+not found	no encontrada	не найден	未找到
+package repository found	repositorio de paquetes encontrado	репозиторий пакетов найден	已找到软件包仓库
+no package repository	sin repositorio de paquetes	нет репозитория пакетов	没有软件包仓库
+S:  AstraSage drive - part of the system, always used.	S:  unidad AstraSage: parte del sistema, siempre se usa.	S:  диск AstraSage — часть системы, используется всегда.	S:  AstraSage 驱动器——系统的一部分，始终使用。
+Package	Paquete	Пакет	软件包
+Do you want to install a package now?	¿Quieres instalar un paquete ahora?	Установить пакет сейчас?	现在要安装软件包吗？
+Yes	Sí	Да	是
+No	No	Нет	否
+Package name	Nombre del paquete	Имя пакета	软件包名称
+Full file name of the package	Nombre completo del archivo del paquete	Полное имя файла пакета	软件包的完整文件名
+Checks the whole system and drive S:, and creates the config folder and what is missing.	Comprueba todo el sistema y la unidad S:, y crea la carpeta config y lo que falte.	Проверяет всю систему и диск S:, создаёт папку config и недостающее.	检查整个系统和驱动器 S:，并创建 config 文件夹及缺失的内容。
+Press Install to begin.\nYour language, theme, sign-in mode and drive choices\nare saved when the installer finishes.	Pulsa Instalar para empezar.\nTu idioma, tema, modo de inicio y unidades\nse guardan cuando termina el instalador.	Нажмите «Установить», чтобы начать.\nЯзык, тема, способ входа и выбор дисков\nсохранятся по окончании установки.	点击“安装”开始。\n安装完成后会保存你选择的\n语言、主题、登录方式和驱动器。
+Back	Atrás	Назад	返回
+OK	Aceptar	ОК	确定
+Installing...	Instalando...	Установка...	正在安装...
+Setup is not finished	La instalación no ha terminado	Установка не завершена	安装尚未完成
+Without the AstraSage OS setup and its choices,\nsome things will not work properly or the way\nyou want. Set it up now?	Sin la instalación de AstraSage OS y sus opciones,\nalgunas cosas no funcionarán bien ni como\nquieres. ¿Configurar ahora?	Без установки AstraSage OS и её настроек\nчто-то будет работать неправильно или\nне так, как вы хотите. Настроить сейчас?	不完成 AstraSage OS 的安装和设置，\n有些功能可能无法正常工作，\n也不符合你的期望。现在设置吗？
+Set up now	Configurar ahora	Настроить сейчас	立即设置
+Close anyway	Cerrar de todos modos	Всё равно закрыть	仍然关闭
+Fill in both the package name and the file name.	Rellena el nombre del paquete y el nombre del archivo.	Заполните имя пакета и имя файла.	请同时填写软件包名称和文件名。
+Another background task is still running - try again in a moment	Otra tarea en segundo plano sigue en curso: inténtalo en un momento	Другая фоновая задача ещё выполняется — повторите чуть позже	另一个后台任务仍在运行——请稍后重试
+Error: sign in first.	Error: inicia sesión primero.	Ошибка: сначала войдите.	错误：请先登录。
+Error: '%s' is a system file and cannot be placed on the desktop.	Error: '%s' es un archivo del sistema y no puede ponerse en el escritorio.	Ошибка: '%s' — системный файл, его нельзя поместить на рабочий стол.	错误：'%s' 是系统文件，不能放到桌面上。
+'%s' is already on the desktop.	'%s' ya está en el escritorio.	'%s' уже на рабочем столе.	'%s' 已经在桌面上了。
+Error: the desktop is full.	Error: el escritorio está lleno.	Ошибка: рабочий стол заполнен.	错误：桌面已满。
+Name:    	Nombre:  	Имя:     	名称:    
+Type:    	Tipo:    	Тип:     	类型:    
+Application	Aplicación	Приложение	应用程序
+Source:  	Origen:  	Источник:	来源:    
+built in (installed with AstraSageOS)	integrada (viene con AstraSageOS)	встроено (идёт с AstraSageOS)	内置（随 AstraSageOS 安装）
+Delete:  	Eliminar:	Удаление:	删除:    
+not possible	no es posible	невозможно	不可用
+Open:    	Abrir:   	Открытие:	打开:    
+double click	doble clic	двойной щелчок	双击
+Application (ASPI package)	Aplicación (paquete ASPI)	Приложение (пакет ASPI)	应用程序（ASPI 软件包）
+Delete uninstalls the package (everywhere).	Eliminar desinstala el paquete (en todas partes).	Удаление деинсталлирует пакет (везде).	删除会卸载该软件包（所有位置）。
+Folder (desktop shortcut)	Carpeta (acceso directo)	Папка (ярлык на рабочем столе)	文件夹（桌面快捷方式）
+File (desktop shortcut)	Archivo (acceso directo)	Файл (ярлык на рабочем столе)	文件（桌面快捷方式）
+Path:    	Ruta:    	Путь:    	路径:    
+Size:    	Tamaño:  	Размер:  	大小:    
+Delete removes the shortcut only.	Eliminar solo quita el acceso directo.	Удаление убирает только ярлык.	删除只会移除快捷方式。
+Error: '%s' is a built-in application and cannot be deleted.	Error: '%s' es una aplicación integrada y no se puede eliminar.	Ошибка: '%s' — встроенное приложение, его нельзя удалить.	错误：'%s' 是内置应用，无法删除。
+Error: cannot remove '%s' right now (sign in / another task is running).	Error: no se puede quitar '%s' ahora (inicia sesión / hay otra tarea en curso).	Ошибка: сейчас нельзя удалить '%s' (войдите / выполняется другая задача).	错误：现在无法移除 '%s'（请登录 / 另一个任务正在运行）。
+No answer	Sin respuesta	Нет ответа	无响应
+Unreadable answer	Respuesta ilegible	Непонятный ответ	无法解析的响应
+Sign in to load the weather	Inicia sesión para ver el tiempo	Войдите, чтобы загрузить погоду	登录后才能加载天气
+Weather	El tiempo	Погода	天气
+Loading...	Cargando...	Загрузка...	加载中...
+No weather data	Sin datos del tiempo	Нет данных о погоде	没有天气数据
+Network	Red	Сеть	网络
+No network card	Sin tarjeta de red	Нет сетевой карты	没有网卡
+connected	conectado	подключено	已连接
+no cable	sin cable	нет кабеля	未插网线
+This is also the phone's / PC's Wi-Fi in an emulator	En un emulador, esto es también el Wi-Fi del teléfono / PC	В эмуляторе это же и Wi-Fi телефона / ПК	在模拟器中，这同时也是手机 / 电脑的 Wi-Fi
+Get address (DHCP)	Obtener dirección (DHCP)	Получить адрес (DHCP)	获取地址 (DHCP)
+adapter found, no driver	adaptador encontrado, sin controlador	адаптер найден, драйвера нет	找到适配器，但没有驱动
+no adapter	sin adaptador	нет адаптера	没有适配器
+Nearby networks: none can be listed	Redes cercanas: no se pueden listar	Ближайшие сети: список недоступен	附近的网络：无法列出
+controller found, no driver	controlador encontrado, sin driver	контроллер найден, драйвера нет	找到控制器，但没有驱动
+no controller (needs USB)	sin controlador (requiere USB)	нет контроллера (нужен USB)	没有控制器（需要 USB）
+Already on the desktop	Ya está en el escritorio	Уже на рабочем столе	已在桌面上
+Add to desktop	Añadir al escritorio	Добавить на рабочий стол	添加到桌面
+Sleeping - press a key or click to wake up	En suspensión: pulsa una tecla o haz clic para despertar	Спящий режим — нажмите клавишу или щёлкните, чтобы проснуться	休眠中——按任意键或点击以唤醒
+Sign in first	Inicia sesión primero	Сначала войдите	请先登录
+Busy, try again	Ocupado, inténtalo de nuevo	Занято, повторите	忙碌中，请重试

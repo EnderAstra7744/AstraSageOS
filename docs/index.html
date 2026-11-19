@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AstraSageOS</title>
+<meta name="description" content="AstraSageOS: sıfırdan yazılmış işletim sistemi — kendi çekirdeği, terminali, paket yöneticisi, dili ve masaüstü arayüzü. / An operating system written from scratch.">
+<meta property="og:title" content="AstraSageOS">
+<meta property="og:description" content="An operating system written from scratch: own kernel, terminal, package manager, language and desktop.">
+<meta property="og:image" content="img/neofetch.webp">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+:root{--bg:#07090a;--bg2:#0d1110;--card:#101614;--line:#1e2824;--text:#e8efe9;--mut:#8fa095;--acc:#a6e22e;--acc2:#5fb61a;--accfg:#0b1204;--glow:rgba(166,226,46,.16);--shadow:0 30px 80px rgba(0,0,0,.55)}
+:root[data-theme="light"]{--bg:#f6f8f4;--bg2:#eaefe6;--card:#fff;--line:#d9e1d3;--text:#10170f;--mut:#566455;--acc:#5fa30f;--acc2:#3f7a08;--accfg:#fff;--glow:rgba(95,163,15,.14);--shadow:0 30px 70px rgba(30,50,10,.18)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+code{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.9em}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+[lang-en]{display:none}
+html[lang="en"] [lang-tr]{display:none}
+html[lang="en"] [lang-en]{display:inline}
+html[lang="en"] div[lang-en],html[lang="en"] p[lang-en]{display:block}
+/* nav */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:6px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:var(--text);margin-right:auto}
+.brand img{width:34px;height:34px;display:block}
+.brand:hover{text-decoration:none}
+nav{display:flex;align-items:center;gap:2px}
+nav a.l{color:var(--mut);padding:8px 12px;border-radius:8px;font-size:15px}
+nav a.l:hover{color:var(--text);background:var(--bg2);text-decoration:none}
+.chip{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;height:36px;min-width:38px;padding:0 10px;font:600 13px inherit;font-family:inherit;cursor:pointer;margin-left:6px}
+.chip:hover{border-color:var(--acc)}
+.half{display:block;width:16px;height:16px;border-radius:50%;border:2px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%);margin:auto}
+.menu{display:none}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:12px 22px;font-weight:600;font-size:16px;border:1px solid transparent;cursor:pointer}
+.btn:hover{text-decoration:none;transform:translateY(-1px)}
+.btn.p{background:var(--acc);color:var(--accfg)}
+.btn.p:hover{background:var(--acc2);color:#fff}
+.btn.s{background:transparent;border-color:var(--line);color:var(--text)}
+.btn.s:hover{border-color:var(--acc)}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+/* hero */
+.hero{position:relative;text-align:center;padding:84px 0 40px;overflow:hidden}
+.hero:before{content:"";position:absolute;left:50%;top:-120px;width:900px;height:620px;transform:translateX(-50%);background:radial-gradient(closest-side,var(--glow),transparent);pointer-events:none}
+.hero>*{position:relative}
+.badge{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 14px;font-size:13px;color:var(--mut)}
+.badge b{color:var(--acc)}
+.hero img.logo{width:104px;height:104px;margin:26px auto 4px;display:block;filter:drop-shadow(0 12px 30px var(--glow))}
+h1{font-size:clamp(34px,6vw,64px);line-height:1.08;letter-spacing:-.02em;margin:14px auto 18px;max-width:900px}
+h1 em{font-style:normal;color:var(--acc)}
+.lead{max-width:720px;margin:0 auto 28px;color:var(--mut);font-size:18px}
+.lead b{color:var(--text)}
+.hero .cta{justify-content:center}
+.meta{color:var(--mut);font-size:14px;margin:16px 0 0}
+.shot{margin:48px auto 0;max-width:980px;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;background:var(--card)}
+.shot img{display:block;width:100%;height:auto;cursor:zoom-in}
+.tag{max-width:760px;margin:36px auto 0;color:var(--mut);font-size:17px}
+/* sections */
+section{padding:84px 0}
+section.alt{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+h2{font-size:clamp(26px,4vw,40px);line-height:1.15;letter-spacing:-.015em;margin:0 0 12px;text-align:center}
+.sub{color:var(--mut);text-align:center;max-width:720px;margin:0 auto 44px;font-size:17px}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;margin:0 0 72px}
+.feat:nth-of-type(even) .ft{order:2}
+.feat h3{font-size:26px;margin:0 0 10px;letter-spacing:-.01em}
+.feat p{color:var(--mut);margin:0 0 12px}
+.feat ul{margin:0;padding-left:20px;color:var(--mut)}
+.feat li{margin:4px 0}
+.fimg{border-radius:12px;border:1px solid var(--line);overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+.fimg img{display:block;width:100%;height:auto;cursor:zoom-in}
+.ico{width:42px;height:42px;border-radius:10px;background:var(--glow);color:var(--acc);display:grid;place-items:center;font-weight:800;margin-bottom:14px;border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.card:hover{border-color:color-mix(in srgb,var(--acc) 50%,var(--line))}
+.card h3{margin:0 0 6px;font-size:17px}
+.card p{margin:0;color:var(--mut);font-size:14.5px;line-height:1.55}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.gallery figure{margin:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gallery img{display:block;width:100%;height:auto;cursor:zoom-in;transition:transform .25s}
+.gallery figure:hover img{transform:scale(1.03)}
+.gallery .iw{overflow:hidden}
+.gallery figcaption{padding:10px 14px;color:var(--mut);font-size:14px}
+/* download */
+.arch{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.arch .card h3{display:flex;justify-content:space-between;align-items:center}
+.pill{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:.03em}
+.pill.ok{background:var(--glow);color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 40%,transparent)}
+.pill.exp{background:rgba(240,170,40,.12);color:#e9a62c;border:1px solid rgba(240,170,40,.4)}
+.dl{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px;text-align:center}
+.dl .cta{justify-content:center;margin-bottom:6px}
+.hash{word-break:break-all;font-size:12.5px}
+.hashes{margin-top:18px;text-align:left;font-size:13px;color:var(--mut)}
+.hashes div{margin:6px 0}
+/* steps */
+.steps{max-width:760px;margin:0 auto 22px;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;position:relative;padding:4px 0 18px 56px;color:var(--mut)}
+.steps li:before{content:counter(s);position:absolute;left:0;top:0;width:38px;height:38px;border-radius:50%;background:var(--glow);color:var(--acc);border:1px solid var(--line);display:grid;place-items:center;font-weight:700}
+.steps b{color:var(--text)}
+pre{max-width:760px;margin:0 auto;background:#050706;color:#d7efc0;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;font-size:14px;line-height:1.6}
+table{border-collapse:collapse;width:100%;max-width:760px;margin:22px auto 0;font-size:15px}
+th,td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mut);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+/* cta band */
+.band{text-align:center;padding:76px 20px;background:radial-gradient(60% 120% at 50% 0%,var(--glow),transparent),var(--bg2);border-top:1px solid var(--line)}
+.band h2{margin-bottom:8px}
+.band p{color:var(--mut);margin:0 0 24px}
+.band .cta{justify-content:center}
+/* footer */
+footer{border-top:1px solid var(--line);padding:48px 0 30px;background:var(--bg)}
+.fcols{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px}
+.fcols h4{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.fcols a{display:block;color:var(--text);padding:3px 0;font-size:15px}
+.fcols .b{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;margin-bottom:10px}
+.fcols .b img{width:32px;height:32px}
+.fcols p{color:var(--mut);font-size:14px;margin:0;max-width:300px}
+.copy{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);color:var(--mut);font-size:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+#lb img{max-width:100%;max-height:100%;border-radius:10px}
+@media (max-width:920px){
+  .feat{grid-template-columns:1fr;gap:22px;margin-bottom:54px}.feat:nth-of-type(even) .ft{order:0}
+  .grid,.arch{grid-template-columns:repeat(2,1fr)}.gallery{grid-template-columns:repeat(2,1fr)}
+  .fcols{grid-template-columns:1fr 1fr}
+}
+@media (max-width:720px){
+  nav a.l{display:none}
+  nav.open{position:absolute;left:0;right:0;top:64px;background:var(--bg);border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;padding:10px 20px}
+  nav.open a.l{display:block}
+  .menu{display:inline-block}
+  .hero{padding-top:52px}section{padding:58px 0}
+  .grid,.arch,.gallery,.fcols{grid-template-columns:1fr}
+  .dl{padding:22px 16px}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap bar">
+  <a class="brand" href="#top"><img src="img/logo.png" alt="As"><span>AstraSageOS</span></a>
+  <nav id="nav">
+    <a class="l" href="#features"><span lang-tr>Özellikler</span><span lang-en>Features</span></a>
+    <a class="l" href="#screens"><span lang-tr>Ekranlar</span><span lang-en>Screenshots</span></a>
+    <a class="l" href="#download"><span lang-tr>İndir</span><span lang-en>Download</span></a>
+    <a class="l" href="#try"><span lang-tr>Nasıl denenir</span><span lang-en>Try it</span></a>
+    <a class="l" href="#packages"><span lang-tr>Paketler</span><span lang-en>Packages</span></a>
+    <a class="l" href="https://github.com/EnderAstra7744" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <button class="chip" id="lang" type="button" aria-label="language">EN</button>
+  <button class="chip" id="theme" type="button" aria-label="theme"><span class="half"></span></button>
+  <button class="chip menu" id="menu" type="button" aria-label="menu">☰</button>
+</div></header>
+
+<main id="top">
+<div class="wrap">
+  <div class="hero">
+    <span class="badge"><b>Stable</b> · v0.9.29</span>
+    <img class="logo" src="img/logo.png" alt="AstraSageOS">
+    <h1><span lang-tr>Sıfırdan yazılmış <em>işletim sistemi.</em></span><span lang-en>An operating system <em>written from scratch.</em></span></h1>
+    <p class="lead">
+      <span lang-tr>Kendi çekirdeği (<b>as_kernel</b>), terminali (<b>AST</b>), paket yöneticisi (<b>ASPI</b>), dili (<b>AstraScript</b>) ve masaüstü arayüzü (<b>AstraGUI</b>) olan bir işletim sistemi. x86, x86_64, ARM64 ve ARM32 için.</span>
+      <span lang-en>An operating system with its own kernel (<b>as_kernel</b>), terminal (<b>AST</b>), package manager (<b>ASPI</b>), language (<b>AstraScript</b>) and desktop (<b>AstraGUI</b>). For x86, x86_64, ARM64 and ARM32.</span>
+    </p>
+    <div class="cta">
+      <a class="btn p" href="#download"><span lang-tr>İndir</span><span lang-en>Download</span></a>
+      <a class="btn s" href="#features"><span lang-tr>Daha fazla bilgi</span><span lang-en>Learn more</span></a>
+    </div>
+    <p class="meta"><span lang-tr>15 MB (xz) · açılınca 146 MB · QEMU ve Limbo ile denenebilir</span><span lang-en>15 MB (xz) · 146 MB unpacked · runs in QEMU and Limbo</span></p>
+    <div class="shot"><img data-zoom src="img/neofetch.webp" alt="AstraSageOS desktop, neofetch"></div>
+    <p class="tag"><span lang-tr>Altında Linux ya da BSD çekirdeği yok. Önyükleme, bellek, disk, ağ, ses, pencere sistemi ve uygulamalar bu projede yazıldı.</span><span lang-en>No Linux or BSD kernel underneath. Boot, memory, disk, network, sound, the window system and the apps are all written in this project.</span></p>
+  </div>
+</div>
+
+<section id="features"><div class="wrap">
+  <h2><span lang-tr>AstraSageOS neden farklı?</span><span lang-en>Why AstraSageOS is different</span></h2>
+  <p class="sub"><span lang-tr>Hazır bir çekirdeğin üstüne giydirilmiş bir dağıtım değil; baştan sona kendi işletim sistemi.</span><span lang-en>Not a distribution dressed over an existing kernel; a complete operating system of its own.</span></p>
+
+  <div class="feat">
+    <div class="ft">
+      <div class="ico">K</div>
+      <h3><span lang-tr>Kendi çekirdeği: as_kernel</span><span lang-en>Its own kernel: as_kernel</span></h3>
+      <p><span lang-tr>Bellek yönetimi, asfs dosya sistemi, ağ ve TLS, ses ve 32/64-bit native programlar çekirdeğin içinde.</span><span lang-en>Memory management, the asfs file system, network and TLS, sound and 32/64-bit native programs live in the kernel.</span></p>
+      <ul>
+        <li><span lang-tr>x86, x86_64, ARM64 ve ARM32 çekirdekleri aynı ISO'da</span><span lang-en>x86, x86_64, ARM64 and ARM32 kernels on the same ISO</span></li>
+        <li><span lang-tr>AST terminali, kullanıcı girişi, neofetch</span><span lang-en>AST terminal, user login, neofetch</span></li>
+      </ul>
+    </div>
+    <div class="fimg"><img data-zoom src="img/desktop.webp" alt="AST terminal"></div>
+  </div>
+
+  <div class="feat">
+    <div class="ft">
+      <div class="ico">UI</div>
+      <h3><span lang-tr>AstraGUI ve 9 tema</span><span lang-en>AstraGUI and 9 themes</span></h3>
+      <p><span lang-tr>Pencereler, dock, çentik, bildirimler ve dosya gezgini. Bir pencere dock'a ya da çentiğe değince onlar kenara çekilir, pencere gidince geri gelir.</span><span lang-en>Windows, dock, notch, notifications and a file explorer. When a window touches the dock or the notch they slide out of the way and come back when the window leaves.</span></p>
+      <ul>
+        <li><span lang-tr>Beyaz, siyah, yeşil, koyu mavi ve daha fazlası</span><span lang-en>White, black, green, dark blue and more</span></li>
+        <li><span lang-tr>Her temanın kendi duvar kâğıdı</span><span lang-en>A wallpaper for every theme</span></li>
+      </ul>
+    </div>
+    <div class="fimg"><img data-zoom src="img/themes.webp" alt="Themes"></div>
+  </div>
+
+  <div class="feat">
+    <div class="ft">
+      <div class="ico">PK</div>
+      <h3><span lang-tr>ASPI ve AstraStore</span><span lang-en>ASPI and AstraStore</span></h3>
+      <p><span lang-tr>Kendi paket yöneticisi ve uygulama mağazası. Paketler GitHub'dan iner, işlemciye göre ayrı arşivler vardır.</span><span lang-en>Its own package manager and app store. Packages come from GitHub, with one archive per processor.</span></p>
+      <ul>
+        <li><code>aspi install</code>, <code>update</code>, <code>upgrade</code></li>
+        <li><span lang-tr>FroggyCode ve NetSurf mağazada</span><span lang-en>FroggyCode and NetSurf in the store</span></li>
+      </ul>
+    </div>
+    <div class="fimg"><img data-zoom src="img/store.webp" alt="AstraStore"></div>
+  </div>
+
+  <div class="feat">
+    <div class="ft">
+      <div class="ico">&lt;/&gt;</div>
+      <h3><span lang-tr>AstraScript ve FroggyCode</span><span lang-en>AstraScript and FroggyCode</span></h3>
+      <p><span lang-tr>Kendi programlama dili (<code>.as</code>) ve sohbet tarzı bir kodlama arkadaşı. Betikler GUI komutlarıyla pencere açabilir.</span><span lang-en>Its own programming language (<code>.as</code>) and a chat-style coding companion. Scripts can open windows with GUI commands.</span></p>
+      <ul>
+        <li><span lang-tr>Dosya oluştur, çalıştır, terminal ve eklentiler</span><span lang-en>Create files, run them, terminal and plugins</span></li>
+        <li><span lang-tr>NetSurf ile web tarayıcısı</span><span lang-en>A web browser through NetSurf</span></li>
+      </ul>
+    </div>
+    <div class="fimg"><img data-zoom src="img/froggy.webp" alt="FroggyCode"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>as_kernel</h3><p><span lang-tr>Çekirdek, sürücüler, ağ, TLS.</span><span lang-en>Kernel, drivers, network, TLS.</span></p></div>
+    <div class="card"><h3>AST</h3><p><span lang-tr>Terminal ve komut kabuğu.</span><span lang-en>Terminal and shell.</span></p></div>
+    <div class="card"><h3>ASPI</h3><p><span lang-tr>Paket yöneticisi.</span><span lang-en>Package manager.</span></p></div>
+    <div class="card"><h3>AstraScript</h3><p><span lang-tr>Kendi dili, GUI komutlarıyla.</span><span lang-en>Own language with GUI commands.</span></p></div>
+  </div>
+</div></section>
+
+<section id="screens" class="alt"><div class="wrap">
+  <h2><span lang-tr>Ekran görüntüleri</span><span lang-en>Screenshots</span></h2>
+  <p class="sub"><span lang-tr>Siyah tema. Görüntüler gerçek arayüz kodunun test düzeneğinde çizdiği karelerdir; tıklayınca büyür.</span><span lang-en>Black theme. These frames are drawn by the real GUI code in the test harness; click to enlarge.</span></p>
+  <div class="gallery">
+    <figure><div class="iw"><img data-zoom src="img/neofetch.webp" alt="neofetch" loading="lazy"></div><figcaption>AST · neofetch</figcaption></figure>
+    <figure><div class="iw"><img data-zoom src="img/explorer.webp" alt="Explorer" loading="lazy"></div><figcaption><span lang-tr>Dosya gezgini</span><span lang-en>File explorer</span></figcaption></figure>
+    <figure><div class="iw"><img data-zoom src="img/store.webp" alt="AstraStore" loading="lazy"></div><figcaption>AstraStore</figcaption></figure>
+    <figure><div class="iw"><img data-zoom src="img/froggy.webp" alt="FroggyCode" loading="lazy"></div><figcaption>FroggyCode</figcaption></figure>
+    <figure><div class="iw"><img data-zoom src="img/netsurf.webp" alt="NetSurf" loading="lazy"></div><figcaption>NetSurf</figcaption></figure>
+    <figure><div class="iw"><img data-zoom src="img/themes.webp" alt="Themes" loading="lazy"></div><figcaption><span lang-tr>Tema seçimi</span><span lang-en>Theme picker</span></figcaption></figure>
+  </div>
+</div></section>
+
+<section id="download"><div class="wrap">
+  <h2><span lang-tr>AstraSageOS'u indir</span><span lang-en>Download AstraSageOS</span></h2>
+  <p class="sub"><span lang-tr>Hangi işlemcide ne kadar denendiğini açıkça yazıyoruz.</span><span lang-en>We state plainly what has been tested on which processor.</span></p>
+  <div class="arch">
+    <div class="card"><h3>x86 <span class="pill ok">STABLE</span></h3><p><span lang-tr>Limbo ve QEMU'da denendi.</span><span lang-en>Tested in Limbo and QEMU.</span></p></div>
+    <div class="card"><h3>x86_64 <span class="pill ok">STABLE</span></h3><p><span lang-tr>Limbo'da denendi; 32-bit programlar uyumluluk kipinde çalışır.</span><span lang-en>Tested in Limbo; 32-bit programs run in compatibility mode.</span></p></div>
+    <div class="card"><h3>ARM64 <span class="pill exp">EXPERIMENTAL</span></h3><p><span lang-tr>Ses, SVG, JavaScript henüz hiç çalıştırılmadı. Limbo ARM'da klavye/fare yok.</span><span lang-en>Sound, SVG, JavaScript never run yet. No keyboard/mouse in Limbo ARM.</span></p></div>
+    <div class="card"><h3>ARM32 <span class="pill exp">EXPERIMENTAL</span></h3><p><span lang-tr>ARM64 ile aynı sınırlar.</span><span lang-en>Same limits as ARM64.</span></p></div>
+  </div>
+  <div class="dl">
+    <div class="cta">
+      <a class="btn p" href="https://github.com/EnderAstra7744/AstraSageOS/releases/latest" target="_blank" rel="noopener">AstraSageOS-0.9.29.iso.xz</a>
+      <a class="btn s" href="https://github.com/EnderAstra7744/AstraSageOS/releases" target="_blank" rel="noopener"><span lang-tr>Tüm sürümler</span><span lang-en>All releases</span></a>
+    </div>
+    <p class="meta"><span lang-tr>Dosya <code>.xz</code> ile sıkıştırılmıştır: indirdikten sonra açın (<code>xz -d</code> veya 7-Zip).</span><span lang-en>The file is <code>.xz</code> compressed: unpack it after downloading (<code>xz -d</code> or 7-Zip).</span></p>
+    <div class="hashes">
+      <div>SHA-256 (.iso.xz): <code class="hash">04cea30ba9bb2929685358487315f5b059788e16cc821e1344350b41ffbcce5a</code></div>
+      <div>SHA-256 (.iso): <code class="hash">ec1a0160f6b732cc639154b44f33cbce2a553d3ade63e8b26d0daffaca09624a</code></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="try" class="alt"><div class="wrap">
+  <h2><span lang-tr>Nasıl denenir?</span><span lang-en>How to try it</span></h2>
+  <p class="sub"><span lang-tr>Android'de Limbo ile ya da bilgisayarda QEMU ile.</span><span lang-en>With Limbo on Android or QEMU on a computer.</span></p>
+  <ol class="steps">
+    <li><span lang-tr><b>ISO'yu açın.</b> İndirdiğiniz <code>.iso.xz</code> dosyasından <code>.iso</code> çıkarın.</span><span lang-en><b>Unpack the ISO.</b> Extract the <code>.iso</code> from the downloaded <code>.iso.xz</code>.</span></li>
+    <li><span lang-tr><b>Makine kurun.</b> x86 veya x86_64, en az <b>512 MB</b> RAM, bir disk dosyası (qcow2) ve ISO'yu CD-ROM olarak verin; CD'den açın.</span><span lang-en><b>Create a machine.</b> x86 or x86_64, at least <b>512 MB</b> RAM, a disk image (qcow2) and the ISO as CD-ROM; boot from CD.</span></li>
+    <li><span lang-tr><b>Hoş geldiniz.</b> İlk açılışta kurulum sihirbazı dil ve tema sorar.</span><span lang-en><b>Welcome.</b> On first boot a wizard asks for language and theme.</span></li>
+    <li><span lang-tr><b>Ağı açın.</b> Terminalde <code>as net dhcp</code> yazın, sonra <code>aspi online</code> ile paketleri görün.</span><span lang-en><b>Bring the network up.</b> Type <code>as net dhcp</code> in the terminal, then <code>aspi online</code> to list packages.</span></li>
+  </ol>
+<pre>qemu-system-x86_64 -m 512 -cdrom AstraSageOS-0.9.29.iso -hda disk.qcow2 -boot d</pre>
+</div></section>
+
+<section id="packages"><div class="wrap">
+  <h2><span lang-tr>Paketler</span><span lang-en>Packages</span></h2>
+  <p class="sub"><span lang-tr>Paketler <a href="https://github.com/EnderAstra7744/aspi-package-sage" target="_blank" rel="noopener">aspi-package-sage</a> deposundan iner. İşlemciye göre ayrı arşivler vardır.</span><span lang-en>Packages come from the <a href="https://github.com/EnderAstra7744/aspi-package-sage" target="_blank" rel="noopener">aspi-package-sage</a> repository, with one archive per processor.</span></p>
+<pre>aspi online              # list what GitHub has
+aspi install NetSurf     # install a package
+aspi update              # refresh the list
+aspi upgrade             # install newer versions
+aspi run FroggyCode      # run a native program</pre>
+  <table>
+    <tr><th>Package</th><th><span lang-tr>Sürüm</span><span lang-en>Version</span></th><th><span lang-tr>Açıklama</span><span lang-en>Description</span></th></tr>
+    <tr><td>NetSurf</td><td>3.11.0</td><td><span lang-tr>Web tarayıcısı</span><span lang-en>Web browser</span></td></tr>
+    <tr><td>FroggyCode</td><td>2.0.0</td><td><span lang-tr>Kodlama arkadaşı</span><span lang-en>Coding companion</span></td></tr>
+  </table>
+</div></section>
+
+<div class="band">
+  <h2><span lang-tr>Farkı görmeye hazır mısın?</span><span lang-en>Ready to see the difference?</span></h2>
+  <p><span lang-tr>ISO'yu indir, QEMU ya da Limbo'da aç.</span><span lang-en>Download the ISO and open it in QEMU or Limbo.</span></p>
+  <div class="cta"><a class="btn p" href="#download"><span lang-tr>İndir</span><span lang-en>Download</span></a></div>
+</div>
+</main>
+
+<footer><div class="wrap">
+  <div class="fcols">
+    <div><div class="b"><img src="img/logo.png" alt=""><span>AstraSageOS</span></div>
+      <p><span lang-tr>EnderAstra7744 tarafından sıfırdan yazıldı.</span><span lang-en>Written from scratch by EnderAstra7744.</span></p></div>
+    <div><h4><span lang-tr>Ürün</span><span lang-en>Product</span></h4>
+      <a href="#features"><span lang-tr>Özellikler</span><span lang-en>Features</span></a>
+      <a href="#screens"><span lang-tr>Ekranlar</span><span lang-en>Screenshots</span></a></div>
+    <div><h4><span lang-tr>Dağıtım</span><span lang-en>Distribution</span></h4>
+      <a href="#download"><span lang-tr>İndir</span><span lang-en>Download</span></a>
+      <a href="#try"><span lang-tr>Nasıl denenir</span><span lang-en>Try it</span></a>
+      <a href="#packages"><span lang-tr>Paketler</span><span lang-en>Packages</span></a></div>
+    <div><h4><span lang-tr>Topluluk</span><span lang-en>Community</span></h4>
+      <a href="https://github.com/EnderAstra7744" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/EnderAstra7744/aspi-package-sage" target="_blank" rel="noopener">aspi-package-sage</a></div>
+  </div>
+  <div class="copy"><span>© AstraSageOS</span><span><span lang-tr>Her şey bu projede yazıldı.</span><span lang-en>Everything written in this project.</span></span></div>
+</div></footer>
+
+<div id="lb" role="dialog" aria-label="image"><img alt=""></div>
+<script>
+(function(){
+  var root=document.documentElement;
+  function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  var lang=get('as-lang')||((navigator.language||'tr').slice(0,2)==='tr'?'tr':'en');
+  function setLang(l){lang=l;root.lang=l;document.getElementById('lang').textContent=l==='tr'?'EN':'TR';set('as-lang',l)}
+  setLang(lang);
+  document.getElementById('lang').onclick=function(){setLang(lang==='tr'?'en':'tr')};
+  var th=get('as-theme'); if(th) root.dataset.theme=th;
+  document.getElementById('theme').onclick=function(){
+    var dark=root.dataset.theme!=='light';
+    root.dataset.theme=dark?'light':'dark'; set('as-theme',root.dataset.theme)};
+  var nav=document.getElementById('nav');
+  document.getElementById('menu').onclick=function(){nav.classList.toggle('open')};
+  nav.addEventListener('click',function(e){if(e.target.closest('a'))nav.classList.remove('open')});
+  var lb=document.getElementById('lb'),li=lb.querySelector('img');
+  document.querySelectorAll('img[data-zoom]').forEach(function(i){i.onclick=function(){li.src=i.src;lb.style.display='flex'}});
+  lb.onclick=function(){lb.style.display='none'};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')lb.style.display='none'});
+})();
+</script>
+</body>
+</html>

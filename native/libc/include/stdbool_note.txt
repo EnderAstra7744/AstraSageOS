@@ -1,0 +1,1 @@
+stdbool/stdint/stddef/stdarg/limits/float come from the compiler's own freestanding headers.

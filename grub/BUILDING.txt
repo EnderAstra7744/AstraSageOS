@@ -1,0 +1,32 @@
+AstraSageOS - how the GRUB part of the ISO is made
+===================================================
+
+The ISO (`make iso`) contains the REAL GNU GRUB 2.12 - not an imitation. Its binaries were built from the official
+GRUB 2.12 sources and are committed in grub/bin/ so that `make iso` needs only Python 3:
+
+  grub/bin/i386-pc/      GRUB modules (*.mod, *.lst) for BIOS + eltorito.img (the GRUB core with GRUB's own El Torito boot code)
+  grub/bin/x86_64-efi/   GRUB modules for 64-bit UEFI        grub/bin/efi/BOOTX64.EFI   (GRUB for 64-bit UEFI)
+  grub/bin/i386-efi/     GRUB modules for 32-bit UEFI        grub/bin/efi/BOOTIA32.EFI  (GRUB for 32-bit UEFI)
+  grub/grub.cfg          the menu           grub/themes/astrasage/   gfxmenu theme   grub/fonts/unicode.pf2   AstraSage font for GRUB
+  grub/COPYING.GRUB      GRUB is GPLv3+ and is distributed with this licence text.
+
+Boot chain:  BIOS/UEFI -> GRUB -> menu (grub.cfg + theme) -> `multiboot /boot/as_kernel.elf` -> as_kernel -> desktop.
+AstraSageOS is not Linux: only `multiboot` (Multiboot 1) is used, never `linux` / `linuxefi` / `chainloader`.
+
+Rebuilding GRUB (only needed to change GRUB itself; needs gcc, bison, flex, autoconf, automake, python3, git):
+
+  git clone --depth 1 --branch grub-2.12 https://github.com/rhboot/grub2.git grub       # = upstream GRUB 2.12
+  # gnulib at the revision named in grub/bootstrap.conf (GNULIB_REVISION): https://github.com/coreutils/gnulib
+  cd grub && patch -p1 < <project>/grub/grub-2.12-no-gettext.patch    # drops gettext/po/docs (not available here)
+  ./bootstrap --gnulib-srcdir=<gnulib> --no-git --skip-po
+  for each target (i386-pc, x86_64-efi, i386-efi):
+      mkdir b-<t> && cd b-<t> && ../grub/configure --target=<cpu> --with-platform=<pc|efi> --disable-werror --disable-nls \
+          --disable-grub-mkfont --disable-grub-mount --disable-device-mapper --disable-libzfs --prefix=<inst-t>
+      make AWK=<wrapper>      # the wrapper = mawk -f grub/asorti.awk "$@"  (mawk has no asorti(); gawk does not need it)
+      make install AWK=<wrapper>
+  python3 sys/tools/grubstage.py <b-pc> <inst-pc> <inst-efi64> <inst-efi32>      # fills grub/bin/
+The patch only removes the gettext / po / docs parts of the build files; GRUB's code is untouched.
+
+Regenerating the theme pictures / font: python3 sys/tools/mkgrubtheme.py (needs Pillow), python3 sys/tools/mkpf2.py.
+
+Extra patch: grub-core/kern/main.c: the BIOS banner 'Welcome to GRUB!' -> green 'Welcome To AstraSageOS GNU/GRUB menu.' (light-green highlight colour set around the grub_printf in grub_main; the banner is not printed on EFI).

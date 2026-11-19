@@ -1,0 +1,9 @@
+{
+  "name": "NetSurf",
+  "version": "3.11.0",
+  "description": "NetSurf web browser (native C program)",
+  "description2": "file $README.md",
+  "type": "app",
+  "language": "c",
+  "commands": ["netsurf"]
+}

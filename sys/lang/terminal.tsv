@@ -1,0 +1,129 @@
+Show this list of commands	Mostrar esta lista de comandos	Показать список команд	显示命令列表	Bu komut listesini göster
+Show OS, kernel and terminal version	Mostrar versión del SO, núcleo y terminal	Версии ОС, ядра и терминала	显示系统、内核和终端版本	İS, çekirdek ve terminal sürümünü göster
+Show system information	Mostrar información del sistema	Информация о системе	显示系统信息	Sistem bilgisini göster
+Show the CPU architecture and 64-bit status	Mostrar la arquitectura de CPU y el estado de 64 bits	Показать архитектуру ЦП и состояние 64 бит	显示CPU架构和64位状态	CPU mimarisini ve 64-bit durumunu göster
+Clear the screen	Limpiar la pantalla	Очистить экран	清屏	Ekranı temizle
+List files and directories	Listar archivos y carpetas	Список файлов и папок	列出文件和文件夹	Dosya ve klasörleri listele
+Print the current directory	Mostrar la carpeta actual	Показать текущую папку	显示当前文件夹	Geçerli klasörü yaz
+Change the current directory	Cambiar de carpeta	Сменить текущую папку	切换当前文件夹	Klasör değiştir
+Create a directory	Crear una carpeta	Создать папку	创建文件夹	Klasör oluştur
+Create an empty file	Crear un archivo vacío	Создать пустой файл	创建空文件	Boş dosya oluştur
+Print a file's contents	Mostrar el contenido de un archivo	Показать содержимое файла	显示文件内容	Dosyanın içeriğini yaz
+Write (-a append) text; \\n = newline	Escribir texto (-a añade); \\n = salto de línea	Записать текст (-a добавить); \\n = новая строка	写入文本（-a 追加）；\\n = 换行	Metin yaz (-a ekler); \\n = satır sonu
+Copy a file or folder (like cp)	Copiar archivo o carpeta (como cp)	Копировать файл или папку (как cp)	复制文件或文件夹（类似 cp）	Dosya veya klasör kopyala (cp gibi)
+Remove a file or folder (like rm)	Borrar archivo o carpeta (como rm)	Удалить файл или папку (как rm)	删除文件或文件夹（类似 rm）	Dosya veya klasör sil (rm gibi)
+Edit a file (AstraScript errors shown live)	Editar un archivo (errores de AstraScript en vivo)	Редактировать файл (ошибки AstraScript сразу)	编辑文件（实时显示 AstraScript 错误）	Dosya düzenle (AstraScript hataları canlı)
+Run a native C/C++ program (ELF)	Ejecutar un programa nativo C/C++ (ELF)	Запустить программу C/C++ (ELF)	运行原生 C/C++ 程序 (ELF)	Yerel C/C++ programı çalıştır (ELF)
+Show the AstraSage system banner	Mostrar el banner del sistema AstraSage	Показать баннер AstraSage	显示 AstraSage 系统横幅	AstraSage sistem başlığını göster
+Log in, create or remove an account	Iniciar sesión, crear o borrar una cuenta	Войти, создать или удалить учётную запись	登录、创建或删除账户	Giriş yap, hesap oluştur veya sil
+Show or change your account name / password	Ver o cambiar el nombre / contraseña de la cuenta	Показать или изменить имя / пароль	查看或更改账户名称 / 密码	Hesap adını / parolasını göster veya değiştir
+Log out of the current account	Cerrar la sesión actual	Выйти из учётной записи	退出当前账户	Hesaptan çıkış yap
+Grant/revoke execute permission (.asbin)	Dar/quitar permiso de ejecución (.asbin)	Выдать/снять право запуска (.asbin)	授予/撤销执行权限 (.asbin)	Çalıştırma izni ver/al (.asbin)
+Package installer (also written: aspi ...)	Instalador de paquetes (también: aspi ...)	Установщик пакетов (также: aspi ...)	软件包安装器（也可写作：aspi ...）	Paket yükleyici (aspi ... diye de yazılır)
+Network card, link and address	Tarjeta de red, enlace y dirección	Сетевая карта, связь и адрес	网卡、链路和地址	Ağ kartı, bağlantı ve adres
+Current weather (needs the internet)	Clima actual (requiere internet)	Текущая погода (нужен интернет)	当前天气（需要网络）	Güncel hava durumu (internet gerekir)
+Wi-Fi manager (adapter status)	Gestor Wi-Fi (estado del adaptador)	Wi-Fi (состояние адаптера)	Wi-Fi 管理（适配器状态）	Wi-Fi yöneticisi (adaptör durumu)
+Bluetooth manager (controller status)	Gestor Bluetooth (estado del controlador)	Bluetooth (состояние контроллера)	蓝牙管理（控制器状态）	Bluetooth yöneticisi (denetleyici durumu)
+Send ICMP echo requests	Enviar solicitudes ICMP echo	Отправить ICMP echo-запросы	发送 ICMP 回显请求	ICMP echo istekleri gönder
+Download a web page over HTTP or HTTPS	Descargar una página web por HTTP o HTTPS	Скачать веб-страницу по HTTP или HTTPS	通过 HTTP 或 HTTPS 下载网页	HTTP veya HTTPS ile web sayfası indir
+TLS status / certificate checking	Estado de TLS / comprobación de certificados	Состояние TLS / проверка сертификатов	TLS 状态 / 证书检查	TLS durumu / sertifika denetimi
+Restart the computer	Reiniciar el equipo	Перезагрузить компьютер	重启计算机	Bilgisayarı yeniden başlat
+Power the computer off	Apagar el equipo	Выключить компьютер	关闭计算机	Bilgisayarı kapat
+List a folder as a tree	Mostrar una carpeta como árbol	Показать папку в виде дерева	以树形列出文件夹	Klasörü ağaç olarak listele
+Make a short name for a command	Crear un nombre corto para un comando	Создать короткое имя для команды	为命令创建短名称	Komut için kısa ad oluştur
+Terminal tabs (each its own AST session)	Pestañas del terminal (cada una con su sesión AST)	Вкладки терминала (у каждой свой сеанс AST)	终端标签页（各有独立的 AST 会话）	Terminal sekmeleri (her biri ayrı AST oturumu)
+Colours of tabs, lines, typed text, neofetch	Colores de pestañas, líneas, texto y neofetch	Цвета вкладок, линий, ввода и neofetch	标签页、线条、输入文字和 neofetch 的颜色	Sekme, çizgi, yazı ve neofetch renkleri
+Run a /proc trigger file (error screens)	Ejecutar un archivo /proc (pantallas de error)	Запустить файл /proc (экраны ошибок)	运行 /proc 触发文件（错误屏幕）	/proc tetik dosyası çalıştır (hata ekranları)
+Compile + encrypt a script into /user/apps	Compilar y cifrar un script en /user/apps	Скомпилировать и зашифровать скрипт в /user/apps	编译并加密脚本到 /user/apps	Betiği derle + şifrele (/user/apps)
+Run a sealed app of /user/apps	Ejecutar una app sellada de /user/apps	Запустить запечатанное приложение из /user/apps	运行 /user/apps 中的封装应用	/user/apps içindeki mühürlü uygulamayı çalıştır
+Run a script (same as: asscript)	Ejecutar un script (igual que asscript)	Запустить скрипт (как asscript)	运行脚本（同 asscript）	Betik çalıştır (asscript ile aynı)
+Run an AstraScript file	Ejecutar un archivo AstraScript	Запустить файл AstraScript	运行 AstraScript 文件	AstraScript dosyası çalıştır
+Usage: as %s\n	Uso: as %s\n	Использование: as %s\n	用法：as %s\n	Kullanım: as %s\n
+Directory created: %s\n	Carpeta creada: %s\n	Папка создана: %s\n	已创建文件夹：%s\n	Klasör oluşturuldu: %s\n
+File created: %s\n	Archivo creado: %s\n	Файл создан: %s\n	已创建文件：%s\n	Dosya oluşturuldu: %s\n
+Copied %s -> %s\n	Copiado %s -> %s\n	Скопировано %s -> %s\n	已复制 %s -> %s\n	Kopyalandı %s -> %s\n
+Removed %s\n	Eliminado %s\n	Удалено %s\n	已删除 %s\n	Silindi %s\n
+Account '%s' created. Log in with: as login <PASSWORD> %s\n	Cuenta '%s' creada. Inicia sesión con: as login <CONTRASEÑA> %s\n	Учётная запись '%s' создана. Вход: as login <ПАРОЛЬ> %s\n	账户 '%s' 已创建。登录：as login <密码> %s\n	'%s' hesabı oluşturuldu. Giriş: as login <PAROLA> %s\n
+Account '%s' and everything in its folder were removed.\n	La cuenta '%s' y todo su contenido se eliminaron.\n	Учётная запись '%s' и всё в её папке удалено.\n	账户 '%s' 及其文件夹中的所有内容已删除。\n	'%s' hesabı ve klasöründeki her şey silindi.\n
+Password changed.\n	Contraseña cambiada.\n	Пароль изменён.\n	密码已更改。\n	Parola değiştirildi.\n
+Nobody is logged in.\n	Nadie ha iniciado sesión.\n	Никто не вошёл в систему.\n	当前没有人登录。\n	Kimse giriş yapmamış.\n
+Goodbye, %s.\n	Hasta luego, %s.\n	До свидания, %s.\n	再见，%s。\n	Hoşça kal, %s.\n
+Rebooting AstraSageOS...\n	Reiniciando AstraSageOS...\n	Перезагрузка AstraSageOS...\n	正在重启 AstraSageOS...\n	AstraSageOS yeniden başlatılıyor...\n
+Shutting down AstraSageOS...\n	Apagando AstraSageOS...\n	Выключение AstraSageOS...\n	正在关闭 AstraSageOS...\n	AstraSageOS kapatılıyor...\n
+Alias removed: %s\n	Alias eliminado: %s\n	Псевдоним удалён: %s\n	已删除别名：%s\n	Takma ad silindi: %s\n
+Neofetch look saved. Try: as neofetch\n	Aspecto de neofetch guardado. Prueba: as neofetch\n	Вид neofetch сохранён. Попробуйте: as neofetch\n	已保存 neofetch 外观。试试：as neofetch\n	Neofetch görünümü kaydedildi. Dene: as neofetch\n
+No packages installed. Try: aspi repo   /   aspi install <Name>\n	No hay paquetes instalados. Prueba: aspi repo   /   aspi install <Nombre>\n	Пакеты не установлены. Попробуйте: aspi repo   /   aspi install <Имя>\n	尚未安装软件包。试试：aspi repo   /   aspi install <名称>\n	Kurulu paket yok. Dene: aspi repo   /   aspi install <Ad>\n
+AST: login required - as login <PASSWORD> <NAME>   (new account: as login create <PASSWORD> <NAME>)	AST: se requiere iniciar sesión - as login <CONTRASEÑA> <NOMBRE>   (cuenta nueva: as login create <CONTRASEÑA> <NOMBRE>)	AST: нужен вход - as login <ПАРОЛЬ> <ИМЯ>   (новая запись: as login create <ПАРОЛЬ> <ИМЯ>)	AST：需要登录 - as login <密码> <名称>   （新账户：as login create <密码> <名称>）	AST: giriş gerekli - as login <PAROLA> <AD>   (yeni hesap: as login create <PAROLA> <AD>)
+AST: scripts cannot start other scripts	AST: los scripts no pueden iniciar otros scripts	AST: скрипты не могут запускать другие скрипты	AST：脚本不能启动其他脚本	AST: betikler başka betik başlatamaz
+AST: 'aspi' is not allowed inside a script	AST: 'aspi' no se permite dentro de un script	AST: 'aspi' нельзя использовать в скрипте	AST：脚本中不允许使用 'aspi'	AST: betik içinde 'aspi' kullanılamaz
+AST: 'acs' is not allowed inside a script	AST: 'acs' no se permite dentro de un script	AST: 'acs' нельзя использовать в скрипте	AST：脚本中不允许使用 'acs'	AST: betik içinde 'acs' kullanılamaz
+AST: 'as %s' is not allowed inside a script	AST: 'as %s' no se permite dentro de un script	AST: 'as %s' нельзя использовать в скрипте	AST：脚本中不允许使用 'as %s'	AST: betik içinde 'as %s' kullanılamaz
+AST: unknown command '%s' - commands start with 'as' (only aspi stands alone), try: as help	AST: comando desconocido '%s' - los comandos empiezan con 'as' (solo aspi va solo), prueba: as help	AST: неизвестная команда '%s' - команды начинаются с 'as' (отдельно только aspi), см.: as help	AST：未知命令 '%s' - 命令以 'as' 开头（只有 aspi 可单独使用），试试：as help	AST: bilinmeyen komut '%s' - komutlar 'as' ile başlar (yalnız aspi tek başına), dene: as help
+AST: unknown command 'as %s' - try: as help	AST: comando desconocido 'as %s' - prueba: as help	AST: неизвестная команда 'as %s' - см.: as help	AST：未知命令 'as %s' - 试试：as help	AST: bilinmeyen komut 'as %s' - dene: as help
+Welcome to AST. Type %s for the command list.	Bienvenido a AST. Escribe %s para ver los comandos.	Добро пожаловать в AST. Введите %s — список команд.	欢迎使用 AST。输入 %s 查看命令列表。	AST'ye hoş geldiniz. Komut listesi için %s yazın.
+Signed in as %s (saved login). Sign out with: as logout	Sesión iniciada como %s (guardada). Para salir: as logout	Вы вошли как %s (сохранённый вход). Выход: as logout	已登录为 %s（已保存登录）。退出：as logout	%s olarak giriş yapıldı (kayıtlı oturum). Çıkış: as logout
+New here? as login create <PASSWORD> <NAME>, then: as login <PASSWORD> <NAME>	¿Nuevo? as login create <CONTRASEÑA> <NOMBRE>, luego: as login <CONTRASEÑA> <NOMBRE>	Впервые здесь? as login create <ПАРОЛЬ> <ИМЯ>, затем: as login <ПАРОЛЬ> <ИМЯ>	第一次使用？as login create <密码> <名称>，然后：as login <密码> <名称>	Yeni misiniz? as login create <PAROLA> <AD>, sonra: as login <PAROLA> <AD>
+AST - AstraSageOS Terminal. Usage: as <command> [arguments]	AST - Terminal de AstraSageOS. Uso: as <comando> [argumentos]	AST - терминал AstraSageOS. Использование: as <команда> [аргументы]	AST - AstraSageOS 终端。用法：as <命令> [参数]	AST - AstraSageOS Terminali. Kullanım: as <komut> [argümanlar]
+Files need a login. Scripts need: as cper +x <FILE.as>	Los archivos requieren iniciar sesión. Los scripts requieren: as cper +x <ARCHIVO.as>	Для файлов нужен вход. Для скриптов нужно: as cper +x <ФАЙЛ.as>	文件操作需要登录。脚本需要：as cper +x <文件.as>	Dosyalar için giriş gerekir. Betikler için: as cper +x <DOSYA.as>
+Items	Elementos	Элементы	项目	Öğe
+Usage: as <command>   (try: as help)	Uso: as <comando>   (prueba: as help)	Использование: as <команда>   (см.: as help)	用法：as <命令>   （试试：as help）	Kullanım: as <komut>   (dene: as help)
+Done	Hecho	Готово	完成	Tamam
+FAILED	ERROR	СБОЙ	失败	BAŞARISIZ
+WARNING: 	AVISO: 	ВНИМАНИЕ: 	警告：	UYARI: 
+%s %s is already installed	%s %s ya está instalado	%s %s уже установлен	%s %s 已安装	%s %s zaten kurulu
+Archive size %u is not supported (max 2 MiB)	No se admite un archivo de %u bytes (máx. 2 MiB)	Размер архива %u не поддерживается (макс. 2 МиБ)	不支持 %u 字节的压缩包（最大 2 MiB）	%u bayt boyutlu arşiv desteklenmiyor (en çok 2 MiB)
+Asking GitHub for the package list (%s)	Pidiendo la lista de paquetes a GitHub (%s)	Запрос списка пакетов у GitHub (%s)	正在向 GitHub 请求软件包列表 (%s)	GitHub'dan paket listesi isteniyor (%s)
+Checking package '%s' in repo (%s)	Comprobando el paquete '%s' en el repositorio (%s)	Проверка пакета '%s' в репозитории (%s)	正在仓库中检查软件包 '%s' (%s)	'%s' paketi depoda denetleniyor (%s)
+Compiling %s	Compilando %s	Компиляция %s	正在编译 %s	%s derleniyor
+Copying %s (%s)	Copiando %s (%s)	Копирование %s (%s)	正在复制 %s (%s)	%s kopyalanıyor (%s)
+Creating folder %s (%s)	Creando la carpeta %s (%s)	Создание папки %s (%s)	正在创建文件夹 %s (%s)	%s klasörü oluşturuluyor (%s)
+Dependencies are nested too deeply	Las dependencias están anidadas demasiado	Слишком глубокая вложенность зависимостей	依赖嵌套过深	Bağımlılıklar çok derin iç içe
+Dependency %s could not be installed	No se pudo instalar la dependencia %s	Не удалось установить зависимость %s	无法安装依赖 %s	%s bağımlılığı kurulamadı
+Dependency %s is already installed	La dependencia %s ya está instalada	Зависимость %s уже установлена	依赖 %s 已安装	%s bağımlılığı zaten kurulu
+Download: %s	Descarga: %s	Загрузка: %s	下载：%s	İndirme: %s
+Download: GitHub answered HTTP %d	Descarga: GitHub respondió HTTP %d	Загрузка: GitHub ответил HTTP %d	下载：GitHub 返回 HTTP %d	İndirme: GitHub HTTP %d yanıtı verdi
+Downloading %s from GitHub (%s)	Descargando %s de GitHub (%s)	Загрузка %s с GitHub (%s)	正在从 GitHub 下载 %s (%s)	%s GitHub'dan indiriliyor (%s)
+Found %s %s (%s archive)%s	Encontrado %s %s (archivo %s)%s	Найден %s %s (архив %s)%s	找到 %s %s（%s 压缩包）%s	%s %s bulundu (%s arşivi)%s
+GitHub answered HTTP %d%s	GitHub respondió HTTP %d%s	GitHub ответил HTTP %d%s	GitHub 返回 HTTP %d%s	GitHub HTTP %d yanıtı verdi%s
+GitHub lists %d package archive(s)	GitHub lista %d archivo(s) de paquetes	GitHub перечисляет архивов пакетов: %d	GitHub 列出了 %d 个软件包压缩包	GitHub %d paket arşivi listeliyor
+GitHub: %s	GitHub: %s	GitHub: %s	GitHub：%s	GitHub: %s
+Opening .aspi archive (%d entries)	Abriendo el archivo .aspi (%d entradas)	Открытие архива .aspi (записей: %d)	正在打开 .aspi 压缩包（%d 项）	Arşiv açılıyor: .aspi (%d giriş)
+Reading ASPIManifest.json	Leyendo ASPIManifest.json	Чтение ASPIManifest.json	正在读取 ASPIManifest.json	ASPIManifest.json okunuyor
+Reading installer.txt	Leyendo installer.txt	Чтение installer.txt	正在读取 installer.txt	installer.txt okunuyor
+Registering package in /.aspi/app	Registrando el paquete en /.aspi/app	Регистрация пакета в /.aspi/app	正在 /.aspi/app 中注册软件包	Paket /.aspi/app içine kaydediliyor
+Registering package in /.aspi/app (%s)	Registrando el paquete en /.aspi/app (%s)	Регистрация пакета в /.aspi/app (%s)	正在 /.aspi/app 中注册软件包 (%s)	Paket /.aspi/app içine kaydediliyor (%s)
+Removing %s %s	Eliminando %s %s	Удаление %s %s	正在删除 %s %s	%s %s kaldırılıyor
+Replacing %s %s with %s	Reemplazando %s %s por %s	Замена %s %s на %s	正在将 %s %s 替换为 %s	%s %s, %s ile değiştiriliyor
+Sealing %s (%s)	Sellando %s (%s)	Запечатывание %s (%s)	正在封存 %s (%s)	%s mühürleniyor (%s)
+Verifying SHA-256	Verificando SHA-256	Проверка SHA-256	正在校验 SHA-256	SHA-256 doğrulanıyor
+Package Archive Copying to /.aspi/lib (%s)	Copiando el archivo del paquete a /.aspi/lib (%s)	Копирование архива пакета в /.aspi/lib (%s)	正在将软件包文件复制到 /.aspi/lib (%s)	Paket arşivi /.aspi/lib içine kopyalanıyor (%s)
+Package Archive Copying to /.aspi/lib/%s (%d files, %d sealed%s)	Copiando el archivo del paquete a /.aspi/lib/%s (%d archivos, %d sellados%s)	Копирование архива пакета в /.aspi/lib/%s (файлов: %d, запечатано: %d%s)	正在将软件包文件复制到 /.aspi/lib/%s（%d 个文件，%d 个已封存%s）	Paket arşivi /.aspi/lib/%s içine kopyalanıyor (%d dosya, %d mühürlü%s)
+Package files removed from /.aspi/lib/%s and /.aspi/app	Archivos del paquete eliminados de /.aspi/lib/%s y /.aspi/app	Файлы пакета удалены из /.aspi/lib/%s и /.aspi/app	已从 /.aspi/lib/%s 和 /.aspi/app 删除软件包文件	Paket dosyaları /.aspi/lib/%s ve /.aspi/app içinden silindi
+installer.txt lists %d third-party package(s)	installer.txt lista %d paquete(s) de terceros	installer.txt перечисляет сторонних пакетов: %d	installer.txt 列出了 %d 个第三方软件包	installer.txt %d üçüncü taraf paketi listeliyor
+No installer.txt: the package has no third-party requirements	Sin installer.txt: el paquete no requiere nada de terceros	Нет installer.txt: пакету не нужны сторонние компоненты	没有 installer.txt：该软件包没有第三方依赖	installer.txt yok: paketin üçüncü taraf gereksinimi yok
+The package adds AST command(s): %s	El paquete añade comandos de AST: %s	Пакет добавляет команды AST: %s	该软件包添加了 AST 命令：%s	Paket AST komutları ekliyor: %s
+Too many packages in the repository - the rest is ignored	Demasiados paquetes en el repositorio: el resto se ignora	Слишком много пакетов в репозитории — остальные игнорируются	仓库中的软件包过多，其余将被忽略	Depoda çok fazla paket var - kalanı yok sayılıyor
+Verifying SHA-256 (archive does not match the repo index)	Verificando SHA-256 (el archivo no coincide con el índice)	Проверка SHA-256 (архив не совпадает с индексом репозитория)	正在校验 SHA-256（压缩包与仓库索引不符）	SHA-256 doğrulanıyor (arşiv depo dizinine uymuyor)
+Check the name (aspi online lists what GitHub has) and that the network works: as net dhcp	Comprueba el nombre (aspi online lista lo que tiene GitHub) y que la red funcione: as net dhcp	Проверьте имя (aspi online покажет список GitHub) и работу сети: as net dhcp	请检查名称（aspi online 会列出 GitHub 上的内容）以及网络是否正常：as net dhcp	Adı kontrol et (aspi online GitHub'dakileri listeler) ve ağın çalıştığına bak: as net dhcp
+Package '%s'%s%s is not built in, on the repo disk or on GitHub	El paquete '%s'%s%s no está integrado, ni en el disco del repositorio ni en GitHub	Пакет '%s'%s%s не найден ни во встроенных, ни на диске репозитория, ни на GitHub	软件包 '%s'%s%s 既不在内置、仓库磁盘上，也不在 GitHub 上	'%s'%s%s paketi ne yerleşik, ne depo diskinde, ne de GitHub'da var
+Address set (not saved across restarts).\n	Dirección configurada (no se guarda al reiniciar).\n	Адрес задан (не сохраняется после перезапуска).\n	地址已设置（重启后不保留）。\n	Adres ayarlandı (yeniden başlatınca kaybolur).\n
+Asking for an address (DHCP) ...\n	Pidiendo una dirección (DHCP) ...\n	Запрос адреса (DHCP) ...\n	正在请求地址 (DHCP) ...\n	Adres isteniyor (DHCP) ...\n
+  mask %s  gateway %s  DNS %s\n	  máscara %s  puerta de enlace %s  DNS %s\n	  маска %s  шлюз %s  DNS %s\n	  掩码 %s  网关 %s  DNS %s\n	  maske %s  ağ geçidi %s  DNS %s\n
+No DHCP answer	Sin respuesta DHCP	Нет ответа DHCP	DHCP 无响应	DHCP yanıtı yok
+ - the old address is kept (set one by hand: as net ip ...)\n	 - se mantiene la dirección anterior (ponla a mano: as net ip ...)\n	 — прежний адрес сохранён (задайте вручную: as net ip ...)\n	——保留原地址（可手动设置：as net ip ...）\n	 - eski adres korunuyor (elle ayarla: as net ip ...)\n
+Usage: as net dns <name>\n	Uso: as net dns <nombre>\n	Использование: as net dns <имя>\n	用法：as net dns <名称>\n	Kullanım: as net dns <ad>\n
+%s: no answer / name not found	%s: sin respuesta / nombre no encontrado	%s: нет ответа / имя не найдено	%s：无响应 / 未找到名称	%s: yanıt yok / ad bulunamadı
+The network manager window needs the graphical desktop.\n	La ventana del gestor de red necesita el escritorio gráfico.\n	Окно управления сетью требует графического рабочего стола.\n	网络管理窗口需要图形桌面。\n	Ağ yöneticisi penceresi grafik masaüstü gerektirir.\n
+Network card : %s\n	Tarjeta de red: %s\n	Сетевая карта : %s\n	网卡         : %s\n	Ağ kartı     : %s\n
+MAC address  : %02x:%02x:%02x:%02x:%02x:%02x\n	Dirección MAC : %02x:%02x:%02x:%02x:%02x:%02x\n	MAC-адрес     : %02x:%02x:%02x:%02x:%02x:%02x\n	MAC 地址     : %02x:%02x:%02x:%02x:%02x:%02x\n	MAC adresi   : %02x:%02x:%02x:%02x:%02x:%02x\n
+Link         : %s\n	Enlace        : %s\n	Связь         : %s\n	连接         : %s\n	Bağlantı     : %s\n
+up	activo	есть	已连接	açık
+down (no cable / the emulator has no network)	caído (sin cable / el emulador no tiene red)	нет (нет кабеля / в эмуляторе нет сети)	断开（无网线 / 模拟器没有网络）	kapalı (kablo yok / emülatörde ağ yok)
+IPv4         : %s  mask %s  gateway %s\n	IPv4          : %s  máscara %s  puerta de enlace %s\n	IPv4          : %s  маска %s  шлюз %s\n	IPv4         : %s  掩码 %s  网关 %s\n	IPv4         : %s  maske %s  ağ geçidi %s\n
+DNS          : %s\n	DNS           : %s\n	DNS           : %s\n	DNS          : %s\n	DNS          : %s\n
+Wi-Fi adapter: %s\n	Adaptador Wi-Fi: %s\n	Адаптер Wi-Fi : %s\n	Wi-Fi 适配器 : %s\n	Wi-Fi adaptörü: %s\n
+none found	ninguno	не найден	未找到	bulunamadı
+AstraSageOS has no driver for it	AstraSageOS no tiene controlador para él	В AstraSageOS нет драйвера для него	AstraSageOS 没有它的驱动	AstraSageOS'ta bunun sürücüsü yok
+ (a Wi-Fi chip needs firmware and an 802.11 stack).\n	 (un chip Wi-Fi necesita firmware y una pila 802.11).\n	 (для Wi-Fi-чипа нужны прошивка и стек 802.11).\n	（Wi-Fi 芯片需要固件和 802.11 协议栈）。\n	 (Wi-Fi çipi bellenim ve 802.11 yığını gerektirir).\n
+An emulator (QEMU, Limbo, Bochs) has no radio: the phone's or PC's Wi-Fi reaches AstraSageOS as the wired card.\n	Un emulador (QEMU, Limbo, Bochs) no tiene radio: el Wi-Fi del teléfono o PC llega a AstraSageOS como tarjeta cableada.\n	В эмуляторе (QEMU, Limbo, Bochs) нет радиомодуля: Wi-Fi телефона или ПК доступен в AstraSageOS как проводная карта.\n	模拟器（QEMU、Limbo、Bochs）没有无线电：手机或电脑的 Wi-Fi 会作为有线网卡出现在 AstraSageOS 中。\n	Emülatörde (QEMU, Limbo, Bochs) telsiz yoktur: telefonun veya PC'nin Wi-Fi'si AstraSageOS'a kablolu kart olarak ulaşır.\n
+Bluetooth controller: %s\n	Controlador Bluetooth: %s\n	Контроллер Bluetooth: %s\n	蓝牙控制器：%s\n	Bluetooth denetleyicisi: %s\n

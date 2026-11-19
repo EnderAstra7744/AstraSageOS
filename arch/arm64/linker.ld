@@ -1,0 +1,13 @@
+ENTRY(_start)
+SECTIONS
+{
+    . = 0x40080000;
+    .text   : { KEEP(*(.text.boot)) *(.text .text.*) }
+    .rodata : ALIGN(4096) { *(.rodata .rodata.*) }
+    .data   : ALIGN(4096) { *(.data .data.*) }
+    .bss    : ALIGN(4096) { __bss_start = .; *(COMMON) *(.bss .bss.*) . = ALIGN(16); __bss_end = .; }
+    . = ALIGN(16);
+    . += 0x20000;
+    __stack_top = .;
+    _end = .;
+}

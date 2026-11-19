@@ -1,0 +1,13 @@
+#ifndef _AS_SYS_TYPES_H
+#define _AS_SYS_TYPES_H
+#include <stddef.h>
+#include <stdint.h>
+typedef int ssize_t;
+typedef long off_t;
+typedef unsigned int mode_t;
+typedef int pid_t;
+typedef unsigned int uid_t;
+typedef unsigned int gid_t;
+typedef unsigned int u_int;
+typedef unsigned char u_char;
+#endif

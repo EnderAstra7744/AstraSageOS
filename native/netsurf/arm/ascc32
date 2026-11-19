@@ -1,0 +1,2 @@
+#!/bin/sh
+exec clang --target=armv7a-none-eabi -mcpu=cortex-a15 -mfpu=vfpv4-d16 -mfloat-abi=hard -marm -mno-unaligned-access -ffreestanding -fno-builtin -fno-builtin-memcpy -fno-builtin-memset -fno-pic -fno-pie -fno-stack-protector -fno-asynchronous-unwind-tables -nostdinc -isystem /home/claude/ns/inst32/include -isystem /home/claude/AstraSageOS/native/libc/include -isystem $(clang -print-resource-dir)/include -I/home/claude/AstraSageOS/native -O2 -DAS_ASTRA -DHAVE_REGEX "$@" -w

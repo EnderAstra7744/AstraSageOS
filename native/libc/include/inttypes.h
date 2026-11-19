@@ -1,0 +1,26 @@
+#ifndef _AS_INTTYPES_H
+#define _AS_INTTYPES_H
+#include <stdint.h>
+#define PRId8 "d"
+#define PRId16 "d"
+#define PRId32 "d"
+#define PRId64 "lld"
+#define PRIu8 "u"
+#define PRIu16 "u"
+#define PRIu32 "u"
+#define PRIu64 "llu"
+#define PRIx32 "x"
+#define PRIx64 "llx"
+#define PRIX32 "X"
+#define PRIdPTR "d"
+#define PRIuPTR "u"
+#define PRIxPTR "x"
+#define SCNd32 "d"
+#define SCNu32 "u"
+#define SCNx32 "x"
+#define SCNd64 "lld"
+#define SCNu64 "llu"
+#define SCNx64 "llx"
+#define PRIo32 "o"
+#define PRIi32 "i"
+#endif

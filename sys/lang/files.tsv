@@ -1,0 +1,87 @@
+Folder	Carpeta	Папка	文件夹
+Text file (.txt)	Archivo de texto (.txt)	Текстовый файл (.txt)	文本文件 (.txt)
+AstraScript file (.as)	Archivo AstraScript (.as)	Файл AstraScript (.as)	AstraScript 文件 (.as)
+C source file	Archivo fuente C	Исходный файл C	C 源文件
+C++ source file	Archivo fuente C++	Исходный файл C++	C++ 源文件
+Assembly source file	Archivo fuente Assembly	Исходный файл Assembly	汇编源文件
+File	Archivo	Файл	文件
+This is the top of the file tree.	Estás en lo más alto del árbol de archivos.	Это вершина дерева файлов.	这里是文件树的最顶层。
+Permission denied	Permiso denegado	Доступ запрещён	权限被拒绝
+Error: '%s' is a protected root file. Root files can never be deleted or changed.	Error: '%s' es un archivo raíz protegido. Los archivos raíz nunca se pueden borrar ni cambiar.	Ошибка: '%s' — защищённый корневой файл. Корневые файлы нельзя удалять или менять.	错误：'%s' 是受保护的根文件，根文件无法删除或修改。
+Error: you must be signed in. Use AST: as login <PASSWORD> <NAME>	Error: debes iniciar sesión. En AST: as login <CONTRASEÑA> <NOMBRE>	Ошибка: нужно войти. В AST: as login <ПАРОЛЬ> <ИМЯ>	错误：请先登录。在 AST 中输入：as login <密码> <名称>
+Error: '%s' belongs to another user. You can only change your own folder.	Error: '%s' pertenece a otro usuario. Solo puedes cambiar tu propia carpeta.	Ошибка: '%s' принадлежит другому пользователю. Можно менять только свою папку.	错误：'%s' 属于其他用户，你只能修改自己的文件夹。
+Cannot %s '%s': %s	No se puede %s '%s': %s	Не удалось %s '%s': %s	无法%s '%s'：%s
+AST can only open files inside your own folder (S:/usrs/%s).	AST solo puede abrir archivos de tu propia carpeta (S:/usrs/%s).	AST открывает файлы только из вашей папки (S:/usrs/%s).	AST 只能打开你自己文件夹中的文件 (S:/usrs/%s)。
+Opening %s in AstraSage Edit (AST)...	Abriendo %s en AstraSage Edit (AST)...	Открываю %s в AstraSage Edit (AST)...	正在 AstraSage Edit (AST) 中打开 %s...
+AST is busy - finish what is running there, then try again.	AST está ocupado: termina lo que se ejecuta allí y vuelve a intentarlo.	AST занят — завершите то, что там работает, и повторите.	AST 正忙——请先结束其中正在运行的内容，然后重试。
+Name:      %s	Nombre:    %s	Имя:       %s	名称:      %s
+Type:      %s	Tipo:      %s	Тип:       %s	类型:      %s
+Location:  %.80s	Ubicación: %.80s	Место:     %.80s	位置:      %.80s
+Size:      %u item(s), %s inside	Tamaño:    %u elemento(s), %s dentro	Размер:    %u элем., внутри %s	大小:      %u 项，内含 %s
+Size:      %s (%u bytes)	Tamaño:    %s (%u bytes)	Размер:    %s (%u байт)	大小:      %s (%u 字节)
+Created:   %s	Creado:    %s	Создан:    %s	创建:      %s
+Modified:  %s	Modificado:%s	Изменён:   %s	修改:      %s
+Access:    %s	Acceso:    %s	Доступ:    %s	权限:      %s
+yours - can be changed	tuyo: se puede cambiar	ваш — можно менять	属于你——可以修改
+another user's - read only	de otro usuario: solo lectura	другого пользователя — только чтение	其他用户的——只读
+protected - read only	protegido: solo lectura	защищён — только чтение	受保护——只读
+Root folders cannot be copied.	Las carpetas raíz no se pueden copiar.	Корневые папки нельзя копировать.	根文件夹无法复制。
+Cannot copy a folder into itself.	No se puede copiar una carpeta dentro de sí misma.	Нельзя копировать папку в саму себя.	无法把文件夹复制到它自己里面。
+'%s' already exists in that folder.	'%s' ya existe en esa carpeta.	'%s' уже есть в этой папке.	该文件夹中已存在 '%s'。
+Copied '%s' to %.70s	'%s' copiado a %.70s	'%s' скопирован в %.70s	已将 '%s' 复制到 %.70s
+No such folder: %s	No existe la carpeta: %s	Нет такой папки: %s	没有这个文件夹：%s
+Rename	Cambiar nombre	Переименовать	重命名
+New name:	Nuevo nombre:	Новое имя:	新名称:
+Cancel	Cancelar	Отмена	取消
+New folder	Nueva carpeta	Новая папка	新建文件夹
+New file	Nuevo archivo	Новый файл	新建文件
+Name:	Nombre:	Имя:	名称:
+Create	Crear	Создать	创建
+Delete	Eliminar	Удалить	删除
+Delete '%s'%s?	¿Eliminar '%s'%s?	Удалить '%s'%s?	删除 '%s'%s？
+ and everything inside it	 y todo lo que contiene	 и всё, что внутри	 及其中的所有内容
+Info	Información	Сведения	信息
+Close	Cerrar	Закрыть	关闭
+Password required	Contraseña necesaria	Нужен пароль	需要密码
+Wrong password - try again:	Contraseña incorrecta: inténtalo de nuevo:	Неверный пароль — повторите:	密码错误——请重试:
+[acs] Pls Enter your Password:	[acs] Introduce tu contraseña:	[acs] Введите ваш пароль:	[acs] 请输入你的密码:
+Error	Error	Ошибка	错误
+Copy to Folder	Copiar a carpeta	Копировать в папку	复制到文件夹
+New Folder	Nueva carpeta	Новая папка	新建文件夹
+New File	Nuevo archivo	Новый файл	新建文件
+Devices and folders	Dispositivos y carpetas	Устройства и папки	设备和文件夹
+Local Disk (S:/)	Disco local (S:/)	Локальный диск (S:/)	本地磁盘 (S:/)
+%s used of %s	%s usados de %s	занято %s из %s	已用 %s / 共 %s
+Memory (RAM)	Memoria (RAM)	Память (ОЗУ)	内存 (RAM)
+%u MiB used of %u MiB	%u MiB usados de %u MiB	занято %u МиБ из %u МиБ	已用 %u MiB / 共 %u MiB
+Root	Raíz	Корень	根目录
+System folders	Carpetas del sistema	Системные папки	系统文件夹
+Home	Inicio	Домашняя	主文件夹
+Your personal files	Tus archivos personales	Ваши личные файлы	你的个人文件
+Opens your home folder	Abre tu carpeta de inicio	Открывает вашу домашнюю папку	打开你的主文件夹
+This PC	Este equipo	Этот компьютер	此电脑
+Quick access	Acceso rápido	Быстрый доступ	快速访问
+Drive S:	Unidad S:	Диск S:	驱动器 S:
+Sign in to browse your files.	Inicia sesión para ver tus archivos.	Войдите, чтобы просматривать файлы.	请登录以浏览你的文件。
+In AST type:  as login <PASSWORD> <NAME>	En AST escribe:  as login <CONTRASEÑA> <NOMBRE>	В AST введите:  as login <ПАРОЛЬ> <ИМЯ>	在 AST 中输入:  as login <密码> <名称>
+This folder is empty.	Esta carpeta está vacía.	Эта папка пуста.	此文件夹是空的。
+Copy '%.30s': open the target folder	Copiando '%.30s': abre la carpeta de destino	Копирование '%.30s': откройте папку назначения	正在复制 '%.30s'：请打开目标文件夹
+Paste here	Pegar aquí	Вставить сюда	粘贴到此处
+This PC - click a tile to open it	Este equipo: haz clic en un icono para abrirlo	Этот компьютер — нажмите плитку, чтобы открыть	此电脑——点击图块即可打开
+folder	carpeta	папка	文件夹
+%d item(s)	%d elemento(s)	элементов: %d	%d 项
+Renamed to '%s'	Renombrado a '%s'	Переименовано в '%s'	已重命名为 '%s'
+Created '%s'	Creado '%s'	Создано: '%s'	已创建 '%s'
+Deleted '%s'	Eliminado '%s'	Удалено: '%s'	已删除 '%s'
+Placed on the desktop: %s	Colocado en el escritorio: %s	Помещено на рабочий стол: %s	已放到桌面：%s
+Dropped outside: nothing was copied.	Soltado fuera: no se copió nada.	Отпущено снаружи: ничего не скопировано.	拖到了外面：没有复制任何内容。
+Memory: %u of %u MiB in use	Memoria: %u de %u MiB en uso	Память: используется %u из %u МиБ	内存：已使用 %u / %u MiB
+Welcome back	Bienvenido de nuevo	С возвращением	欢迎回来
+Sign in to AstraSageOS	Inicia sesión en AstraSageOS	Вход в AstraSageOS	登录 AstraSageOS
+User name	Nombre de usuario	Имя пользователя	用户名
+Password	Contraseña	Пароль	密码
+Sign in	Iniciar sesión	Войти	登录
+Other account	Otra cuenta	Другая учётная запись	其他账户
+Create account	Crear cuenta	Создать учётную запись	创建账户
+Type a user name	Escribe un nombre de usuario	Введите имя пользователя	请输入用户名
+Type a password	Escribe una contraseña	Введите пароль	请输入密码

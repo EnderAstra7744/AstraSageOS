@@ -1,0 +1,58 @@
+Appearance	Apariencia	Оформление	外观
+Windows	Ventanas	Окна	窗口
+Sound	Sonido	Звук	声音
+Account	Cuenta	Учётная запись	账户
+About	Acerca de	О системе	关于
+Settings	Ajustes	Настройки	设置
+Dock, windows and every place that was black in older versions follow the theme.	El dock, las ventanas y todo lo que era negro en versiones antiguas siguen el tema.	Док, окна и всё, что раньше было чёрным, следуют теме.	程序坞、窗口以及旧版本中所有黑色的地方都会跟随主题。
+How see-through window frames and window insides are.	Cuán transparentes son los marcos y el interior de las ventanas.	Насколько прозрачны рамки и содержимое окон.	窗口边框和窗口内部有多透明。
+Window frame	Marco de la ventana	Рамка окна	窗口边框
+Window inside	Interior de la ventana	Содержимое окна	窗口内部
+Preview: the stripes are behind the window	Vista previa: las franjas están detrás de la ventana	Предпросмотр: полосы находятся за окном	预览：条纹在窗口后面
+The volume of the window sounds and of the tray slider.	El volumen de los sonidos de ventana y de la barra de la bandeja.	Громкость звуков окон и ползунка в трее.	窗口声音和托盘滑块的音量。
+Volume	Volumen	Громкость	音量
+Play sound	Reproducir sonido	Проиграть звук	播放声音
+Window sounds need a Sound Blaster 16 or Intel AC97 sound card.	Los sonidos de ventana necesitan una tarjeta de sonido Sound Blaster 16 o Intel AC97.	Для звуков окон нужна звуковая карта Sound Blaster 16 или Intel AC97.	窗口声音需要 Sound Blaster 16 或 Intel AC97 声卡。
+Signed in as	Sesión iniciada como	Вы вошли как	当前登录:
+New name	Nuevo nombre	Новое имя	新名称
+Current password	Contraseña actual	Текущий пароль	当前密码
+Change name	Cambiar nombre	Сменить имя	修改名称
+New password	Nueva contraseña	Новый пароль	新密码
+Change password	Cambiar contraseña	Сменить пароль	修改密码
+Kernel	Núcleo	Ядро	内核
+Screen	Pantalla	Экран	屏幕
+Password changed.	Contraseña cambiada.	Пароль изменён.	密码已修改。
+Name changed.	Nombre cambiado.	Имя изменено.	名称已修改。
+Dark blue	Azul oscuro	Тёмно-синяя	深蓝色
+Yellow	Amarillo	Жёлтая	黄色
+Red	Rojo	Красная	红色
+Blue	Azul	Синяя	蓝色
+Purple	Morado	Фиолетовая	紫色
+Light	Claro	Светлая	浅色
+Dark	Oscuro	Тёмная	深色
+White	Blanco	Белая	白色
+Light, default	Claro, predeterminado	Светлая, по умолчанию	浅色，默认
+January	Enero	Январь	一月
+February	Febrero	Февраль	二月
+March	Marzo	Март	三月
+April	Abril	Апрель	四月
+May	Mayo	Май	五月
+June	Junio	Июнь	六月
+July	Julio	Июль	七月
+August	Agosto	Август	八月
+September	Septiembre	Сентябрь	九月
+October	Octubre	Октябрь	十月
+November	Noviembre	Ноябрь	十一月
+December	Diciembre	Декабрь	十二月
+Monday	Lunes	Понедельник	星期一
+Tuesday	Martes	Вторник	星期二
+Wednesday	Miércoles	Среда	星期三
+Thursday	Jueves	Четверг	星期四
+Friday	Viernes	Пятница	星期五
+Saturday	Sábado	Суббота	星期六
+Sunday	Domingo	Воскресенье	星期日
+Sleep	Suspender	Сон	睡眠
+Restart	Reiniciar	Перезагрузка	重启
+Shut down	Apagar	Выключить	关机
+Hello	Hola	Привет	你好
+@language-names	Español	Русский	简体中文 中文界面 一二三四五六日
